@@ -29,6 +29,9 @@ typedef struct process {
 					// 'registers_t' defined in x86.h
 
 	procstate_t p_state;		// Process state; see above
+	int p_priority;
+	int p_proportional;
+	int p_runtime;   //record the time it get runned
 	int p_exit_status;		// Process's exit status
 } process_t;
 

@@ -16,7 +16,8 @@
 #define INT_SYS_EXIT		49
 #define INT_SYS_USER1		50
 #define INT_SYS_USER2		51
-
+#define INT_SYS_PRI 		52
+#define INT_SYS_PROP		53	
 
 // The current screen cursor position (stored at memory location 0x198000).
 

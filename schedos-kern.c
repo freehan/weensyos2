@@ -91,6 +91,9 @@ start(void)
 
 		// Mark the process as runnable!
 		proc->p_state = P_RUNNABLE;
+		proc->p_priority = 0;
+		proc->p_proportional = 1;
+		proc->p_runtime = 0;
 	}
 
 	// Initialize the cursor-position shared variable to point to the
@@ -98,9 +101,12 @@ start(void)
 	cursorpos = (uint16_t *) 0xB8000;
 
 	// Initialize the scheduling algorithm.
-	scheduling_algorithm = 0;
-
+	//by Sk
+	//scheduling_algorithm = 0;
+	//scheduling_algorithm = 1;
+    scheduling_algorithm = 2;
 	// Switch to the first process.
+	proc_array[1].p_runtime++;
 	run(&proc_array[1]);
 
 	// Should never get here!
@@ -162,7 +168,15 @@ interrupt(registers_t *reg)
 		// time quantum).
 		// Switch to the next runnable process.
 		schedule();
+    
+	case INT_SYS_PRI:
+		current->p_priority = reg->reg_eax;
+		run(current);
 
+	case INT_SYS_PROP:
+		current->p_proportional = reg->reg_eax;
+		run(current);
+	
 	default:
 		while (1)
 			/* do nothing */;
@@ -193,14 +207,48 @@ schedule(void)
 	if (scheduling_algorithm == 0)
 		while (1) {
 			pid = (pid + 1) % NPROCS;
-
 			// Run the selected process, but skip
 			// non-runnable processes.
 			// Note that the 'run' function does not return.
 			if (proc_array[pid].p_state == P_RUNNABLE)
 				run(&proc_array[pid]);
 		}
-
+	else if (scheduling_algorithm == 1){
+		int cur_highest_pri = 999;
+		pid_t highest_pri_p = 0;
+		int i = 0; //the initial 0 process should be scheduled?
+		while(i<NPROCS || highest_pri_p == 999){
+			pid_t cur_pid = (i+pid) % NPROCS;
+			//cursorpos = console_printf(cursorpos, 0x100, "highest_pri_p is %d\n",highest_pri_p);
+			if(proc_array[cur_pid].p_state == P_RUNNABLE 
+					&& proc_array[cur_pid].p_priority<=cur_highest_pri){
+				highest_pri_p = cur_pid;
+				cur_highest_pri = proc_array[cur_pid].p_priority;
+			}
+			i++;
+		}
+		//cursorpos = console_printf(cursorpos, 0x100, "running %d!\n", highest_pri_p);
+		run(&proc_array[highest_pri_p]);
+	}
+	else if(scheduling_algorithm == 2){
+		float lowest_prop = 65535;
+		pid_t winner = 0;
+		int i = 0; //the initial 0 process should be scheduled?
+		while(i<NPROCS || lowest_prop == 65535){
+			pid_t cur_pid = (i+pid) % NPROCS;
+			float prop_value = (float)proc_array[cur_pid].p_runtime/(float)proc_array[cur_pid].p_proportional;
+			//cursorpos = console_printf(cursorpos, 0x100, "highest_pri_p is %d\n",highest_pri_p);
+			if(proc_array[cur_pid].p_state == P_RUNNABLE 
+					&& prop_value <= lowest_prop){
+					winner = cur_pid;
+					lowest_prop = prop_value;
+			}
+			i++;
+		}
+		//cursorpos = console_printf(cursorpos, 0x100, "running %d!\n", highest_pri_p);
+		proc_array[winner].p_runtime++;
+		run(&proc_array[winner]);
+	}
 	// If we get here, we are running an unknown scheduling algorithm.
 	cursorpos = console_printf(cursorpos, 0x100, "\nUnknown scheduling algorithm %d\n", scheduling_algorithm);
 	while (1)

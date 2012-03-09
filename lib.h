@@ -1,7 +1,6 @@
 #ifndef WEENSYOS_LIB_H
 #define	WEENSYOS_LIB_H
 #include "types.h"
-
 /*****************************************************************************
  * memcpy, memmove, memset, strlen
  *

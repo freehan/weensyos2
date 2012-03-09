@@ -1,14 +1,15 @@
-Name:
-UCLA ID:
+Name: Zhiyang Wang
+UCLA ID: 303991529
 
-Collaborators:
+Collaborators: Minhan Xia 
+UCLA ID: 204000665
 
 -------------------------------------------------------------------------------
 
 Response to Exercise 1:
 
 The name of the scheduling algorithm is:
-
+Round Robin 
 
 (Exercise 2 is a coding exercise)
 
@@ -16,15 +17,33 @@ The name of the scheduling algorithm is:
 Response to Exercise 3:
 
 Average turnaround time for scheduling_algorithm 0:
+A: 319*4 + 1
+B: 319*4 + 2
+C: 319*4 + 3
+D: 319*4 + 4
+average: 319*4 + 10/4 = 1276+2.5 = 1278.5 millisecond
+
 Average turnaround time for scheduling_algorithm 1:
+A: 320
+B: 320*2
+C: 320*3
+D :320*4
+average: 320*2.5 = 800 millisecond
 
 Average wait time for scheduling_algorithm 0:
-Average wait time for scheduling_algorithm 1:
+(0+1+2+3) / 4 = 6 / 4 = 1.5 millisecond
 
+Average wait time for scheduling_algorithm 1:
+(0+320+320*2+320*3)/4 = 320 * 6 / 4 = 480 millisecond 
 
 Exercise 4:
 
 Did you complete Exercise 4A, Exercise 4B, or both for extra credit?
+Both 
+
+For Exercise 4a, according to the requirement, we call the syscall to assign priority in every applications and, in order to let each process to declare their priorities first, we set the initial priority of the 4 the same as 0 so that all of them will first run once and then be scheduled according to the priority they declare.
+
+For Exercise 4b, we design a field called runtime to record the actually running time the process has been allocated with. To record running time, actually there are two ways to do that, one is to modify the run funciton in schedos-x86.c and another is to update the value in the scheduler function. As we consider a situation that user might change the scheduling theme when the system is running, and it's more reasonable to start recording the running time after the user switching to proportional fair theme. So we choose to insert runtime recording in scheduler
 
 
 Exercise 5:

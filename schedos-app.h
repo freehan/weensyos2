@@ -35,6 +35,33 @@ sys_yield(void)
 }
 
 
+/****************************
+  * sys_assign_priority(priority) //by SK
+  * 
+  * Assign the priority to the certain process
+  *
+  ***************************/
+static inline void
+sys_priority(int pri){
+	asm volatile("int %0\n"
+			: : "i" (INT_SYS_PRI),
+				"a" (pri)
+			: "cc", "memory");
+}
+
+/****************************
+  * sys_assign_proportional(proportional) //by SK
+  * 
+  * Assign the proportional to the certain process
+  *
+  ***************************/
+static inline void
+sys_proportional(int prop){
+	asm volatile("int %0\n"
+			: : "i" (INT_SYS_PROP),
+				"a" (prop)
+			: "cc", "memory");
+}
 /*****************************************************************************
  * sys_exit(status)
  *
@@ -60,5 +87,6 @@ sys_exit(int status)
 		     : "cc", "memory");
     loop: goto loop; // Convince GCC that function truly does not return.
 }
+
 
 #endif

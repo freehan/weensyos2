@@ -13,23 +13,35 @@
  *   PRINTCHAR appropriately.
  *
  *****************************************************************************/
-
 #ifndef PRINTCHAR
 #define PRINTCHAR	('1' | 0x0C00)
 #endif
+
+
+#ifndef PRIORITY 
+#define PRIORITY 5	
+#endif
+
+
+#ifndef PROPORTIONAL 
+#define PROPORTIONAL 1	
+#endif
+
 
 void
 start(void)
 {
 	int i;
-
+	sys_priority(PRIORITY);
+	sys_proportional(PROPORTIONAL);
 	for (i = 0; i < RUNCOUNT; i++) {
 		// Write characters to the console, yielding after each one.
 		*cursorpos++ = PRINTCHAR;
 		sys_yield();
 	}
-
+    //by SK, now the system really exits
+	sys_exit(0);
 	// Yield forever.
-	while (1)
-		sys_yield();
+	//while (1)
+	//	sys_yield();
 }
