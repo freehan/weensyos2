@@ -65,7 +65,7 @@ start(void)
 
 	// Set up hardware (schedos-x86.c)
 	segments_init();
-	interrupt_controller_init(0);
+	interrupt_controller_init(1);
 	console_clear();
 
 	// Initialize process descriptors as empty
@@ -96,6 +96,8 @@ start(void)
 	// Initialize the cursor-position shared variable to point to the
 	// console's first character (the upper left).
 	cursorpos = (uint16_t *) 0xB8000;
+	//XIA: try
+	lock = (uint32_t) 0;
 
 	// Initialize the scheduling algorithm.
 	scheduling_algorithm = 0;
@@ -127,7 +129,6 @@ interrupt(registers_t *reg)
 	// Save the current process's register state
 	// into its process descriptor
 	current->p_registers = *reg;
-
 	switch (reg->reg_intno) {
 
 	case INT_SYS_YIELD:
@@ -162,6 +163,11 @@ interrupt(registers_t *reg)
 		// time quantum).
 		// Switch to the next runnable process.
 		schedule();
+
+	case INT_SYS_PRINTCHAR:
+
+		*cursorpos++ = (uint16_t) reg->reg_eax;
+		run(current);
 
 	default:
 		while (1)

@@ -35,6 +35,7 @@ sys_yield(void)
 }
 
 
+
 /*****************************************************************************
  * sys_exit(status)
  *
@@ -60,5 +61,23 @@ sys_exit(int status)
 		     : "cc", "memory");
     loop: goto loop; // Convince GCC that function truly does not return.
 }
+
+//XIA:system call for print out a char
+/*****************************************************************************
+ * sys_print
+ *
+ *   Take a int as input and print the corresponding character on screen
+ *
+ *****************************************************************************/
+
+static inline void
+sys_print(uint16_t print)
+{
+	asm volatile("int %0\n"
+		     : : "i" (INT_SYS_PRINTCHAR),
+		         "a" (print)
+		     : "cc", "memory");
+}
+
 
 #endif

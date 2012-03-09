@@ -17,9 +17,15 @@
 #define INT_SYS_USER1		50
 #define INT_SYS_USER2		51
 
+//XIA: syscall for printing out a char
+#define INT_SYS_PRINTCHAR   52
+
 
 // The current screen cursor position (stored at memory location 0x198000).
 
 extern uint16_t * volatile cursorpos;
+
+//XIA: try add one lock
+extern uint32_t lock;
 
 #endif
