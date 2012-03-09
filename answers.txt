@@ -45,6 +45,8 @@ For Exercise 4a, according to the requirement, we call the syscall to assign pri
 
 For Exercise 4b, we design a field called runtime to record the actually running time the process has been allocated with. To record running time, actually there are two ways to do that, one is to modify the run funciton in schedos-x86.c and another is to update the value in the scheduler function. As we consider a situation that user might change the scheduling theme when the system is running, and it's more reasonable to start recording the running time after the user switching to proportional fair theme. So we choose to insert runtime recording in scheduler
 
+Notice: for Exercise 4b, for every one round (as all processes have run their proportional time), they will run alternatively. For example, for A with proportion as 3, B as 2, the system will run as ABABA, rather than AAABB. We think its more reasonable.
+
 
 Exercise 5:
 
