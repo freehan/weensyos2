@@ -91,9 +91,11 @@ start(void)
 
 		// Mark the process as runnable!
 		proc->p_state = P_RUNNABLE;
+#if CURRENT_PART == 1
 		proc->p_priority = 0;
 		proc->p_proportional = 1;
 		proc->p_runtime = 0;
+#endif
 	}
 
 	// Initialize the cursor-position shared variable to point to the
@@ -106,7 +108,9 @@ start(void)
 	//scheduling_algorithm = 1;
     scheduling_algorithm = 2;
 	// Switch to the first process.
+#if CURRENT_PART == 1
 	proc_array[1].p_runtime++;
+#endif
 	run(&proc_array[1]);
 
 	// Should never get here!
@@ -213,6 +217,7 @@ schedule(void)
 			if (proc_array[pid].p_state == P_RUNNABLE)
 				run(&proc_array[pid]);
 		}
+#if CURRENT_PART==1
 	else if (scheduling_algorithm == 1){
 		int cur_highest_pri = 999;
 		pid_t highest_pri_p = 0;
@@ -249,6 +254,7 @@ schedule(void)
 		proc_array[winner].p_runtime++;
 		run(&proc_array[winner]);
 	}
+#endif
 	// If we get here, we are running an unknown scheduling algorithm.
 	cursorpos = console_printf(cursorpos, 0x100, "\nUnknown scheduling algorithm %d\n", scheduling_algorithm);
 	while (1)
