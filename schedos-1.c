@@ -1,6 +1,9 @@
 #include "schedos-app.h"
 #include "x86sync.h"
 
+#define CURRENT_PART 2
+//switch for the part of extra credit
+#define EXTRA
 /*****************************************************************************
  * schedos-1
  *
@@ -37,7 +40,25 @@ start(void)
 	sys_getticket();
 	for (i = 0; i < RUNCOUNT; i++) {
 		// Write characters to the console, yielding after each one.
+#if CURRENT_PART == 1
 		*cursorpos++ = PRINTCHAR;
+#endif
+
+#if CURRENT_PART == 2
+		//XIA:first solution for synchronization
+#ifndef EXTRA
+		while(atomic_swap(&lock,1) != 0)
+			continue;
+		*cursorpos++ = PRINTCHAR;
+		atomic_swap(&lock,0);
+#endif
+
+
+		//XIA:second solution for synchronization
+#ifdef EXTRA
+		sys_print((uint16_t)PRINTCHAR);
+#endif
+#endif
 		sys_yield();
 	}
     //by SK, now the system really exits

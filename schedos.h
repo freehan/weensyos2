@@ -20,9 +20,15 @@
 #define INT_SYS_PROP		53
 #define INT_SYS_GETTICKET   54
 #define INT_SYS_ABORTTICKET 55
+//XIA: syscall for printing out a char
+#define INT_SYS_PRINTCHAR   56
+
 
 // The current screen cursor position (stored at memory location 0x198000).
 
 extern uint16_t * volatile cursorpos;
 #define CURRENT_PART 1
+
+//XIA: try add one lock
+extern uint32_t lock;
 #endif

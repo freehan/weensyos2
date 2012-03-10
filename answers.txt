@@ -49,7 +49,8 @@ Notice: for Exercise 4b, for every one round (as all processes have run their pr
 
 
 Exercise 5:
-
+During the execution of process 4, the first known timer interrupt occur. 
+When a clock interrupt occurs, the schedule() function is called. The schedule() functions is called, it finds the next runnable process and run it. So process 4 could not finish execution so it could not print out 4 on the screen. 
 
 (Exercise 6 is a coding exercise)
 
@@ -61,3 +62,13 @@ Anything else you'd like us to know:
 Extra credit exercises:
 Extra credit 7:
 First, we use the random function provided by Steve Park (www.cs.wm.edu/~va/software/park) and add two new system calls as getticket and abortticket. When a process call getticket, its pid will add to the ticket array, and array's index is directly the lottery ticket number. Everytime when scheduling, the kernel get one random index and run the process contained in the element of the array. 
+
+Exercise 8:
+We defined CURRENT_PART and EXTRA for you to switch between parts and solutions.
+
+For exercise 6 and 8, I implemented two different mechanisms for synchronization. 
+1. Add a system call that print out a char
+2. Add a lock to ensure atomic access to cursorpos
+
+
+  
