@@ -1,7 +1,6 @@
 #include "schedos-app.h"
 #include "x86sync.h"
 
-#define CURRENT_PART 2
 //switch for the part of extra credit
 #define EXTRA
 /*****************************************************************************

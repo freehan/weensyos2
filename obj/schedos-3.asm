@@ -28,11 +28,11 @@ sys_getticket(){
 	asm volatile("int %0\n"::"i" (INT_SYS_GETTICKET):"cc","memory");
   400009:	cd 36                	int    $0x36
   40000b:	30 c0                	xor    %al,%al
-	sys_priority(PRIORITY);
 	sys_proportional(PROPORTIONAL);
 	sys_getticket();
 	for (i = 0; i < RUNCOUNT; i++) {
 		// Write characters to the console, yielding after each one.
+#if CURRENT_PART == 1
 		*cursorpos++ = PRINTCHAR;
   40000d:	8b 15 00 80 19 00    	mov    0x198000,%edx
   400013:	66 c7 02 33 09       	movw   $0x933,(%edx)

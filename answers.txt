@@ -12,7 +12,7 @@ The name of the scheduling algorithm is:
 Round Robin 
 
 (Exercise 2 is a coding exercise)
-
+scheduling_algorithm = 1
 
 Response to Exercise 3:
 
@@ -43,11 +43,13 @@ Both
 
 For Exercise 4a, according to the requirement, we call the syscall to assign priority in every applications and, in order to let each process to declare their priorities first, we set the initial priority of the 4 the same as 0 so that all of them will first run once and then be scheduled according to the priority they declare.
 
+scheduling_algorithm = 1
+
 For Exercise 4b, we design a field called runtime to record the actually running time the process has been allocated with. To record running time, actually there are two ways to do that, one is to modify the run funciton in schedos-x86.c and another is to update the value in the scheduler function. As we consider a situation that user might change the scheduling theme when the system is running, and it's more reasonable to start recording the running time after the user switching to proportional fair theme. So we choose to insert runtime recording in scheduler
 
 Notice: for Exercise 4b, for every one round (as all processes have run their proportional time), they will run alternatively. For example, for A with proportion as 3, B as 2, the system will run as ABABA, rather than AAABB. We think its more reasonable.
 
-
+scheduling_algorithm = 2
 Exercise 5:
 During the execution of process 4, the first known timer interrupt occur. 
 When a clock interrupt occurs, the schedule() function is called. The schedule() functions is called, it finds the next runnable process and run it. So process 4 could not finish execution so it could not print out 4 on the screen. 
@@ -62,6 +64,8 @@ Anything else you'd like us to know:
 Extra credit exercises:
 Extra credit 7:
 First, we use the random function provided by Steve Park (www.cs.wm.edu/~va/software/park) and add two new system calls as getticket and abortticket. When a process call getticket, its pid will add to the ticket array, and array's index is directly the lottery ticket number. Everytime when scheduling, the kernel get one random index and run the process contained in the element of the array. 
+
+scheduling_algorithm = 3
 
 Exercise 8:
 We defined CURRENT_PART and EXTRA for you to switch between parts and solutions.

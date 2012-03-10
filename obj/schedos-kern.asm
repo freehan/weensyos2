@@ -174,7 +174,7 @@ default_int_handler:
 	pushl %esp
   10006c:	54                   	push   %esp
 	call interrupt
-  10006d:	e8 58 03 00 00       	call   1003ca <interrupt>
+  10006d:	e8 62 03 00 00       	call   1003d4 <interrupt>
 
 00100072 <sys_int_handlers>:
   100072:	20 00                	and    %al,(%eax)
@@ -324,23 +324,23 @@ start(void)
 
 	// Set up hardware (schedos-x86.c)
 	segments_init();
-  1000fc:	e8 6b 03 00 00       	call   10046c <segments_init>
-	interrupt_controller_init(0);
+  1000fc:	e8 8f 03 00 00       	call   100490 <segments_init>
+	interrupt_controller_init(1);
   100101:	83 ec 0c             	sub    $0xc,%esp
-  100104:	6a 00                	push   $0x0
-  100106:	e8 5c 04 00 00       	call   100567 <interrupt_controller_init>
+  100104:	6a 01                	push   $0x1
+  100106:	e8 80 04 00 00       	call   10058b <interrupt_controller_init>
 	console_clear();
-  10010b:	e8 e0 04 00 00       	call   1005f0 <console_clear>
+  10010b:	e8 04 05 00 00       	call   100614 <console_clear>
 	PlantSeeds(1);
   100110:	c7 04 24 01 00 00 00 	movl   $0x1,(%esp)
-  100117:	e8 f5 0b 00 00       	call   100d11 <PlantSeeds>
+  100117:	e8 19 0c 00 00       	call   100d35 <PlantSeeds>
 	// Initialize process descriptors as empty
 	memset(proc_array, 0, sizeof(proc_array));
   10011c:	83 c4 0c             	add    $0xc,%esp
   10011f:	68 cc 01 00 00       	push   $0x1cc
   100124:	6a 00                	push   $0x0
   100126:	68 e0 77 10 00       	push   $0x1077e0
-  10012b:	e8 a0 06 00 00       	call   1007d0 <memset>
+  10012b:	e8 c4 06 00 00       	call   1007f4 <memset>
 	for (i = 0; i < NPROCS; i++) {
 		proc_array[i].p_pid = i;
 		proc_array[i].p_state = P_EMPTY;
@@ -408,7 +408,7 @@ start(void)
 		special_registers_init(proc);
   100197:	83 ec 0c             	sub    $0xc,%esp
   10019a:	53                   	push   %ebx
-  10019b:	e8 04 05 00 00       	call   1006a4 <special_registers_init>
+  10019b:	e8 28 05 00 00       	call   1006c8 <special_registers_init>
 
 		// Set ESP
 		proc->p_registers.reg_esp = stack_ptr;
@@ -453,7 +453,7 @@ start(void)
 
 		// Load process and set EIP, based on ELF image
 		program_loader(i - 1, &proc->p_registers.reg_eip);
-  1001b1:	e8 2a 05 00 00       	call   1006e0 <program_loader>
+  1001b1:	e8 4e 05 00 00       	call   100704 <program_loader>
 		proc_array[i].p_pid = i;
 		proc_array[i].p_state = P_EMPTY;
 	}
@@ -492,9 +492,9 @@ start(void)
 	PlantSeeds(1);
   1001dd:	83 ec 0c             	sub    $0xc,%esp
   1001e0:	6a 01                	push   $0x1
-	//scheduling_algorithm = 1;
-    //scheduling_algorithm = 2;
-    scheduling_algorithm = 3;
+	scheduling_algorithm = 1;
+        //scheduling_algorithm = 2;
+        //scheduling_algorithm = 3;
 	// Switch to the first process.
 #if CURRENT_PART == 1
 	proc_array[1].p_runtime++;
@@ -507,2361 +507,2370 @@ start(void)
 	cursorpos = (uint16_t *) 0xB8000;
   1001e8:	c7 05 00 80 19 00 00 	movl   $0xb8000,0x198000
   1001ef:	80 0b 00 
+	//XIA: try
+	lock = (uint32_t) 0;
+  1001f2:	c7 05 04 80 19 00 00 	movl   $0x0,0x198004
+  1001f9:	00 00 00 
+
 	// Initialize the scheduling algorithm.
 	//by Sk
 	//scheduling_algorithm = 0;
-	//scheduling_algorithm = 1;
-    //scheduling_algorithm = 2;
-    scheduling_algorithm = 3;
-  1001f2:	c7 05 b4 83 10 00 03 	movl   $0x3,0x1083b4
-  1001f9:	00 00 00 
+	scheduling_algorithm = 1;
+  1001fc:	c7 05 b4 83 10 00 01 	movl   $0x1,0x1083b4
+  100203:	00 00 00 
 	// Switch to the first process.
 #if CURRENT_PART == 1
 	proc_array[1].p_runtime++;
 #endif
 
 	PlantSeeds(1);
-  1001fc:	e8 10 0b 00 00       	call   100d11 <PlantSeeds>
+  100206:	e8 2a 0b 00 00       	call   100d35 <PlantSeeds>
 	
 	run(&proc_array[1]);
-  100201:	c7 04 24 3c 78 10 00 	movl   $0x10783c,(%esp)
-  100208:	e8 80 04 00 00       	call   10068d <run>
+  10020b:	c7 04 24 3c 78 10 00 	movl   $0x10783c,(%esp)
+  100212:	e8 9a 04 00 00       	call   1006b1 <run>
 
-0010020d <get_winner>:
+00100217 <get_winner>:
 	}
 	ticket_num--;
 }
 
 pid_t
 get_winner(void){
-  10020d:	83 ec 1c             	sub    $0x1c,%esp
+  100217:	83 ec 1c             	sub    $0x1c,%esp
 	int r = Random()*100000;
-  100210:	e8 37 0a 00 00       	call   100c4c <Random>
-  100215:	d9 7c 24 0e          	fnstcw 0xe(%esp)
-  100219:	d8 0d 64 0e 10 00    	fmuls  0x100e64
-  10021f:	66 8b 44 24 0e       	mov    0xe(%esp),%ax
-  100224:	80 cc 0c             	or     $0xc,%ah
-  100227:	66 89 44 24 0c       	mov    %ax,0xc(%esp)
-  10022c:	d9 6c 24 0c          	fldcw  0xc(%esp)
-  100230:	db 5c 24 08          	fistpl 0x8(%esp)
-  100234:	d9 6c 24 0e          	fldcw  0xe(%esp)
-  100238:	8b 44 24 08          	mov    0x8(%esp),%eax
-  10023c:	99                   	cltd   
-  10023d:	f7 3d ac 79 10 00    	idivl  0x1079ac
-  100243:	8b 04 95 b0 79 10 00 	mov    0x1079b0(,%edx,4),%eax
+  10021a:	e8 51 0a 00 00       	call   100c70 <Random>
+  10021f:	d9 7c 24 0e          	fnstcw 0xe(%esp)
+  100223:	d8 0d 88 0e 10 00    	fmuls  0x100e88
+  100229:	66 8b 44 24 0e       	mov    0xe(%esp),%ax
+  10022e:	80 cc 0c             	or     $0xc,%ah
+  100231:	66 89 44 24 0c       	mov    %ax,0xc(%esp)
+  100236:	d9 6c 24 0c          	fldcw  0xc(%esp)
+  10023a:	db 5c 24 08          	fistpl 0x8(%esp)
+  10023e:	d9 6c 24 0e          	fldcw  0xe(%esp)
+  100242:	8b 44 24 08          	mov    0x8(%esp),%eax
+  100246:	99                   	cltd   
+  100247:	f7 3d ac 79 10 00    	idivl  0x1079ac
+  10024d:	8b 04 95 b0 79 10 00 	mov    0x1079b0(,%edx,4),%eax
 	int winner = r%ticket_num;
 	return tickets[winner];
 }
-  10024a:	83 c4 1c             	add    $0x1c,%esp
-  10024d:	c3                   	ret    
+  100254:	83 c4 1c             	add    $0x1c,%esp
+  100257:	c3                   	ret    
 
-0010024e <schedule>:
+00100258 <schedule>:
  *
  *****************************************************************************/
 
 void
 schedule(void)
 {
-  10024e:	55                   	push   %ebp
-  10024f:	57                   	push   %edi
-  100250:	56                   	push   %esi
-  100251:	53                   	push   %ebx
-  100252:	83 ec 1c             	sub    $0x1c,%esp
+  100258:	55                   	push   %ebp
+  100259:	57                   	push   %edi
+  10025a:	56                   	push   %esi
+  10025b:	53                   	push   %ebx
+  10025c:	83 ec 1c             	sub    $0x1c,%esp
 	pid_t pid = current->p_pid;
-  100255:	a1 b0 83 10 00       	mov    0x1083b0,%eax
-  10025a:	8b 08                	mov    (%eax),%ecx
+  10025f:	a1 b0 83 10 00       	mov    0x1083b0,%eax
+  100264:	8b 08                	mov    (%eax),%ecx
 
 	if (scheduling_algorithm == 0)
-  10025c:	a1 b4 83 10 00       	mov    0x1083b4,%eax
-  100261:	85 c0                	test   %eax,%eax
-  100263:	75 1e                	jne    100283 <schedule+0x35>
+  100266:	a1 b4 83 10 00       	mov    0x1083b4,%eax
+  10026b:	85 c0                	test   %eax,%eax
+  10026d:	75 1e                	jne    10028d <schedule+0x35>
 		while (1) {
 			pid = (pid + 1) % NPROCS;
-  100265:	bb 05 00 00 00       	mov    $0x5,%ebx
-  10026a:	8d 41 01             	lea    0x1(%ecx),%eax
-  10026d:	99                   	cltd   
-  10026e:	f7 fb                	idiv   %ebx
+  10026f:	bb 05 00 00 00       	mov    $0x5,%ebx
+  100274:	8d 41 01             	lea    0x1(%ecx),%eax
+  100277:	99                   	cltd   
+  100278:	f7 fb                	idiv   %ebx
 			// Run the selected process, but skip
 			// non-runnable processes.
 			// Note that the 'run' function does not return.
 			if (proc_array[pid].p_state == P_RUNNABLE)
-  100270:	6b c2 5c             	imul   $0x5c,%edx,%eax
+  10027a:	6b c2 5c             	imul   $0x5c,%edx,%eax
 {
 	pid_t pid = current->p_pid;
 
 	if (scheduling_algorithm == 0)
 		while (1) {
 			pid = (pid + 1) % NPROCS;
-  100273:	89 d1                	mov    %edx,%ecx
+  10027d:	89 d1                	mov    %edx,%ecx
 			// Run the selected process, but skip
 			// non-runnable processes.
 			// Note that the 'run' function does not return.
 			if (proc_array[pid].p_state == P_RUNNABLE)
-  100275:	83 b8 28 78 10 00 01 	cmpl   $0x1,0x107828(%eax)
-  10027c:	75 ec                	jne    10026a <schedule+0x1c>
-  10027e:	e9 18 01 00 00       	jmp    10039b <schedule+0x14d>
+  10027f:	83 b8 28 78 10 00 01 	cmpl   $0x1,0x107828(%eax)
+  100286:	75 ec                	jne    100274 <schedule+0x1c>
+  100288:	e9 18 01 00 00       	jmp    1003a5 <schedule+0x14d>
 				run(&proc_array[pid]);
 		}
 #if CURRENT_PART==1
 	else if (scheduling_algorithm == 1){
-  100283:	83 f8 01             	cmp    $0x1,%eax
-  100286:	75 4c                	jne    1002d4 <schedule+0x86>
-  100288:	31 db                	xor    %ebx,%ebx
-  10028a:	31 ff                	xor    %edi,%edi
-  10028c:	be e7 03 00 00       	mov    $0x3e7,%esi
+  10028d:	83 f8 01             	cmp    $0x1,%eax
+  100290:	75 4c                	jne    1002de <schedule+0x86>
+  100292:	31 db                	xor    %ebx,%ebx
+  100294:	31 ff                	xor    %edi,%edi
+  100296:	be e7 03 00 00       	mov    $0x3e7,%esi
 		int cur_highest_pri = 999;
 		pid_t highest_pri_p = 0;
 		int i = 0; //the initial 0 process should be scheduled?
 		while(i<NPROCS || highest_pri_p == 999){
 			pid_t cur_pid = (i+pid) % NPROCS;
-  100291:	bd 05 00 00 00       	mov    $0x5,%ebp
-  100296:	eb 25                	jmp    1002bd <schedule+0x6f>
-  100298:	8d 04 0b             	lea    (%ebx,%ecx,1),%eax
-  10029b:	99                   	cltd   
-  10029c:	f7 fd                	idiv   %ebp
+  10029b:	bd 05 00 00 00       	mov    $0x5,%ebp
+  1002a0:	eb 25                	jmp    1002c7 <schedule+0x6f>
+  1002a2:	8d 04 0b             	lea    (%ebx,%ecx,1),%eax
+  1002a5:	99                   	cltd   
+  1002a6:	f7 fd                	idiv   %ebp
 			//cursorpos = console_printf(cursorpos, 0x100, "highest_pri_p is %d\n",highest_pri_p);
 			if(proc_array[cur_pid].p_state == P_RUNNABLE 
-  10029e:	6b c2 5c             	imul   $0x5c,%edx,%eax
-  1002a1:	83 b8 28 78 10 00 01 	cmpl   $0x1,0x107828(%eax)
-  1002a8:	75 0e                	jne    1002b8 <schedule+0x6a>
+  1002a8:	6b c2 5c             	imul   $0x5c,%edx,%eax
+  1002ab:	83 b8 28 78 10 00 01 	cmpl   $0x1,0x107828(%eax)
+  1002b2:	75 0e                	jne    1002c2 <schedule+0x6a>
 					&& proc_array[cur_pid].p_priority<=cur_highest_pri){
-  1002aa:	8b 80 2c 78 10 00    	mov    0x10782c(%eax),%eax
+  1002b4:	8b 80 2c 78 10 00    	mov    0x10782c(%eax),%eax
 		pid_t highest_pri_p = 0;
 		int i = 0; //the initial 0 process should be scheduled?
 		while(i<NPROCS || highest_pri_p == 999){
 			pid_t cur_pid = (i+pid) % NPROCS;
 			//cursorpos = console_printf(cursorpos, 0x100, "highest_pri_p is %d\n",highest_pri_p);
 			if(proc_array[cur_pid].p_state == P_RUNNABLE 
-  1002b0:	39 f0                	cmp    %esi,%eax
-  1002b2:	7f 04                	jg     1002b8 <schedule+0x6a>
-  1002b4:	89 d7                	mov    %edx,%edi
-  1002b6:	eb 02                	jmp    1002ba <schedule+0x6c>
-  1002b8:	89 f0                	mov    %esi,%eax
+  1002ba:	39 f0                	cmp    %esi,%eax
+  1002bc:	7f 04                	jg     1002c2 <schedule+0x6a>
+  1002be:	89 d7                	mov    %edx,%edi
+  1002c0:	eb 02                	jmp    1002c4 <schedule+0x6c>
+  1002c2:	89 f0                	mov    %esi,%eax
 					&& proc_array[cur_pid].p_priority<=cur_highest_pri){
 				highest_pri_p = cur_pid;
 				cur_highest_pri = proc_array[cur_pid].p_priority;
 			}
 			i++;
-  1002ba:	43                   	inc    %ebx
-  1002bb:	89 c6                	mov    %eax,%esi
+  1002c4:	43                   	inc    %ebx
+  1002c5:	89 c6                	mov    %eax,%esi
 #if CURRENT_PART==1
 	else if (scheduling_algorithm == 1){
 		int cur_highest_pri = 999;
 		pid_t highest_pri_p = 0;
 		int i = 0; //the initial 0 process should be scheduled?
 		while(i<NPROCS || highest_pri_p == 999){
-  1002bd:	83 fb 04             	cmp    $0x4,%ebx
-  1002c0:	7e d6                	jle    100298 <schedule+0x4a>
+  1002c7:	83 fb 04             	cmp    $0x4,%ebx
+  1002ca:	7e d6                	jle    1002a2 <schedule+0x4a>
 				cur_highest_pri = proc_array[cur_pid].p_priority;
 			}
 			i++;
 		}
 		//cursorpos = console_printf(cursorpos, 0x100, "running %d!\n", highest_pri_p);
 		run(&proc_array[highest_pri_p]);
-  1002c2:	6b ff 5c             	imul   $0x5c,%edi,%edi
-  1002c5:	83 ec 0c             	sub    $0xc,%esp
-  1002c8:	81 c7 e0 77 10 00    	add    $0x1077e0,%edi
-  1002ce:	57                   	push   %edi
-  1002cf:	e8 b9 03 00 00       	call   10068d <run>
+  1002cc:	6b ff 5c             	imul   $0x5c,%edi,%edi
+  1002cf:	83 ec 0c             	sub    $0xc,%esp
+  1002d2:	81 c7 e0 77 10 00    	add    $0x1077e0,%edi
+  1002d8:	57                   	push   %edi
+  1002d9:	e8 d3 03 00 00       	call   1006b1 <run>
 	}
 	else if(scheduling_algorithm == 2){
-  1002d4:	83 f8 02             	cmp    $0x2,%eax
-  1002d7:	0f 85 84 00 00 00    	jne    100361 <schedule+0x113>
-  1002dd:	31 db                	xor    %ebx,%ebx
-  1002df:	31 f6                	xor    %esi,%esi
-  1002e1:	d9 05 68 0e 10 00    	flds   0x100e68
+  1002de:	83 f8 02             	cmp    $0x2,%eax
+  1002e1:	0f 85 84 00 00 00    	jne    10036b <schedule+0x113>
+  1002e7:	31 db                	xor    %ebx,%ebx
+  1002e9:	31 f6                	xor    %esi,%esi
+  1002eb:	d9 05 8c 0e 10 00    	flds   0x100e8c
 		float lowest_prop = 65535;
 		pid_t winner = 0;
 		int i = 0; //the initial 0 process should be scheduled?
 		while(i<NPROCS || lowest_prop == 65535){
 			pid_t cur_pid = (i+pid) % NPROCS;
-  1002e7:	8d 04 0b             	lea    (%ebx,%ecx,1),%eax
-  1002ea:	bf 05 00 00 00       	mov    $0x5,%edi
-  1002ef:	99                   	cltd   
-  1002f0:	f7 ff                	idiv   %edi
+  1002f1:	8d 04 0b             	lea    (%ebx,%ecx,1),%eax
+  1002f4:	bf 05 00 00 00       	mov    $0x5,%edi
+  1002f9:	99                   	cltd   
+  1002fa:	f7 ff                	idiv   %edi
 			float prop_value = (float)proc_array[cur_pid].p_runtime/(float)proc_array[cur_pid].p_proportional;
-  1002f2:	6b c2 5c             	imul   $0x5c,%edx,%eax
+  1002fc:	6b c2 5c             	imul   $0x5c,%edx,%eax
 			//cursorpos = console_printf(cursorpos, 0x100, "highest_pri_p is %d\n",highest_pri_p);
 			if(proc_array[cur_pid].p_state == P_RUNNABLE 
-  1002f5:	83 b8 28 78 10 00 01 	cmpl   $0x1,0x107828(%eax)
-		float lowest_prop = 65535;
-		pid_t winner = 0;
-		int i = 0; //the initial 0 process should be scheduled?
-		while(i<NPROCS || lowest_prop == 65535){
-			pid_t cur_pid = (i+pid) % NPROCS;
-			float prop_value = (float)proc_array[cur_pid].p_runtime/(float)proc_array[cur_pid].p_proportional;
-  1002fc:	8b b8 34 78 10 00    	mov    0x107834(%eax),%edi
-  100302:	8b a8 30 78 10 00    	mov    0x107830(%eax),%ebp
-			//cursorpos = console_printf(cursorpos, 0x100, "highest_pri_p is %d\n",highest_pri_p);
-			if(proc_array[cur_pid].p_state == P_RUNNABLE 
-  100308:	75 20                	jne    10032a <schedule+0xdc>
+  1002ff:	83 b8 28 78 10 00 01 	cmpl   $0x1,0x107828(%eax)
 		float lowest_prop = 65535;
 		pid_t winner = 0;
 		int i = 0; //the initial 0 process should be scheduled?
 		while(i<NPROCS || lowest_prop == 65535){
 			pid_t cur_pid = (i+pid) % NPROCS;
 			float prop_value = (float)proc_array[cur_pid].p_runtime/(float)proc_array[cur_pid].p_proportional;
-  10030a:	89 6c 24 0c          	mov    %ebp,0xc(%esp)
-  10030e:	db 44 24 0c          	fildl  0xc(%esp)
-  100312:	57                   	push   %edi
-  100313:	da 3c 24             	fidivrl (%esp)
-  100316:	d9 c9                	fxch   %st(1)
+  100306:	8b b8 34 78 10 00    	mov    0x107834(%eax),%edi
+  10030c:	8b a8 30 78 10 00    	mov    0x107830(%eax),%ebp
 			//cursorpos = console_printf(cursorpos, 0x100, "highest_pri_p is %d\n",highest_pri_p);
 			if(proc_array[cur_pid].p_state == P_RUNNABLE 
-  100318:	dd e1                	fucom  %st(1)
-  10031a:	df e0                	fnstsw %ax
+  100312:	75 20                	jne    100334 <schedule+0xdc>
 		float lowest_prop = 65535;
 		pid_t winner = 0;
 		int i = 0; //the initial 0 process should be scheduled?
 		while(i<NPROCS || lowest_prop == 65535){
 			pid_t cur_pid = (i+pid) % NPROCS;
 			float prop_value = (float)proc_array[cur_pid].p_runtime/(float)proc_array[cur_pid].p_proportional;
-  10031c:	83 c4 04             	add    $0x4,%esp
+  100314:	89 6c 24 0c          	mov    %ebp,0xc(%esp)
+  100318:	db 44 24 0c          	fildl  0xc(%esp)
+  10031c:	57                   	push   %edi
+  10031d:	da 3c 24             	fidivrl (%esp)
+  100320:	d9 c9                	fxch   %st(1)
 			//cursorpos = console_printf(cursorpos, 0x100, "highest_pri_p is %d\n",highest_pri_p);
 			if(proc_array[cur_pid].p_state == P_RUNNABLE 
-  10031f:	9e                   	sahf   
-  100320:	72 06                	jb     100328 <schedule+0xda>
-  100322:	dd d8                	fstp   %st(0)
-  100324:	89 d6                	mov    %edx,%esi
-  100326:	eb 02                	jmp    10032a <schedule+0xdc>
-  100328:	dd d9                	fstp   %st(1)
+  100322:	dd e1                	fucom  %st(1)
+  100324:	df e0                	fnstsw %ax
+		float lowest_prop = 65535;
+		pid_t winner = 0;
+		int i = 0; //the initial 0 process should be scheduled?
+		while(i<NPROCS || lowest_prop == 65535){
+			pid_t cur_pid = (i+pid) % NPROCS;
+			float prop_value = (float)proc_array[cur_pid].p_runtime/(float)proc_array[cur_pid].p_proportional;
+  100326:	83 c4 04             	add    $0x4,%esp
+			//cursorpos = console_printf(cursorpos, 0x100, "highest_pri_p is %d\n",highest_pri_p);
+			if(proc_array[cur_pid].p_state == P_RUNNABLE 
+  100329:	9e                   	sahf   
+  10032a:	72 06                	jb     100332 <schedule+0xda>
+  10032c:	dd d8                	fstp   %st(0)
+  10032e:	89 d6                	mov    %edx,%esi
+  100330:	eb 02                	jmp    100334 <schedule+0xdc>
+  100332:	dd d9                	fstp   %st(1)
 					&& prop_value <= lowest_prop){
 					winner = cur_pid;
 					lowest_prop = prop_value;
 			}
 			i++;
-  10032a:	43                   	inc    %ebx
+  100334:	43                   	inc    %ebx
 	}
 	else if(scheduling_algorithm == 2){
 		float lowest_prop = 65535;
 		pid_t winner = 0;
 		int i = 0; //the initial 0 process should be scheduled?
 		while(i<NPROCS || lowest_prop == 65535){
-  10032b:	83 fb 04             	cmp    $0x4,%ebx
-  10032e:	7e b7                	jle    1002e7 <schedule+0x99>
-  100330:	d9 05 68 0e 10 00    	flds   0x100e68
-  100336:	d9 c9                	fxch   %st(1)
-  100338:	dd e1                	fucom  %st(1)
-  10033a:	df e0                	fnstsw %ax
-  10033c:	dd d9                	fstp   %st(1)
-  10033e:	9e                   	sahf   
-  10033f:	7a 06                	jp     100347 <schedule+0xf9>
-  100341:	74 a4                	je     1002e7 <schedule+0x99>
-  100343:	dd d8                	fstp   %st(0)
-  100345:	eb 02                	jmp    100349 <schedule+0xfb>
-  100347:	dd d8                	fstp   %st(0)
+  100335:	83 fb 04             	cmp    $0x4,%ebx
+  100338:	7e b7                	jle    1002f1 <schedule+0x99>
+  10033a:	d9 05 8c 0e 10 00    	flds   0x100e8c
+  100340:	d9 c9                	fxch   %st(1)
+  100342:	dd e1                	fucom  %st(1)
+  100344:	df e0                	fnstsw %ax
+  100346:	dd d9                	fstp   %st(1)
+  100348:	9e                   	sahf   
+  100349:	7a 06                	jp     100351 <schedule+0xf9>
+  10034b:	74 a4                	je     1002f1 <schedule+0x99>
+  10034d:	dd d8                	fstp   %st(0)
+  10034f:	eb 02                	jmp    100353 <schedule+0xfb>
+  100351:	dd d8                	fstp   %st(0)
 					lowest_prop = prop_value;
 			}
 			i++;
 		}
 		//cursorpos = console_printf(cursorpos, 0x100, "running %d!\n", highest_pri_p);
 		proc_array[winner].p_runtime++;
-  100349:	6b f6 5c             	imul   $0x5c,%esi,%esi
+  100353:	6b f6 5c             	imul   $0x5c,%esi,%esi
 		run(&proc_array[winner]);
-  10034c:	83 ec 0c             	sub    $0xc,%esp
+  100356:	83 ec 0c             	sub    $0xc,%esp
 					lowest_prop = prop_value;
 			}
 			i++;
 		}
 		//cursorpos = console_printf(cursorpos, 0x100, "running %d!\n", highest_pri_p);
 		proc_array[winner].p_runtime++;
-  10034f:	ff 86 34 78 10 00    	incl   0x107834(%esi)
+  100359:	ff 86 34 78 10 00    	incl   0x107834(%esi)
 		run(&proc_array[winner]);
-  100355:	81 c6 e0 77 10 00    	add    $0x1077e0,%esi
-  10035b:	56                   	push   %esi
-  10035c:	e9 6e ff ff ff       	jmp    1002cf <schedule+0x81>
+  10035f:	81 c6 e0 77 10 00    	add    $0x1077e0,%esi
+  100365:	56                   	push   %esi
+  100366:	e9 6e ff ff ff       	jmp    1002d9 <schedule+0x81>
 	}
 	else if(scheduling_algorithm == 3){ //lottery
-  100361:	83 f8 03             	cmp    $0x3,%eax
-  100364:	75 43                	jne    1003a9 <schedule+0x15b>
+  10036b:	83 f8 03             	cmp    $0x3,%eax
+  10036e:	75 43                	jne    1003b3 <schedule+0x15b>
 		pid_t winner;
 		if(ticket_num < NPROCS-1){
-  100366:	83 3d ac 79 10 00 03 	cmpl   $0x3,0x1079ac
-  10036d:	7f 1b                	jg     10038a <schedule+0x13c>
+  100370:	83 3d ac 79 10 00 03 	cmpl   $0x3,0x1079ac
+  100377:	7f 1b                	jg     100394 <schedule+0x13c>
 			while (1) {
 				pid = (pid + 1) % NPROCS;
-  10036f:	bb 05 00 00 00       	mov    $0x5,%ebx
-  100374:	8d 41 01             	lea    0x1(%ecx),%eax
-  100377:	99                   	cltd   
-  100378:	f7 fb                	idiv   %ebx
+  100379:	bb 05 00 00 00       	mov    $0x5,%ebx
+  10037e:	8d 41 01             	lea    0x1(%ecx),%eax
+  100381:	99                   	cltd   
+  100382:	f7 fb                	idiv   %ebx
 				// Run the selected process, but skip
 				// non-runnable processes.
 				// Note that the 'run' function does not return.
 				if (proc_array[pid].p_state == P_RUNNABLE)
-  10037a:	6b c2 5c             	imul   $0x5c,%edx,%eax
+  100384:	6b c2 5c             	imul   $0x5c,%edx,%eax
 	}
 	else if(scheduling_algorithm == 3){ //lottery
 		pid_t winner;
 		if(ticket_num < NPROCS-1){
 			while (1) {
 				pid = (pid + 1) % NPROCS;
-  10037d:	89 d1                	mov    %edx,%ecx
+  100387:	89 d1                	mov    %edx,%ecx
 				// Run the selected process, but skip
 				// non-runnable processes.
 				// Note that the 'run' function does not return.
 				if (proc_array[pid].p_state == P_RUNNABLE)
-  10037f:	83 b8 28 78 10 00 01 	cmpl   $0x1,0x107828(%eax)
-  100386:	75 ec                	jne    100374 <schedule+0x126>
-  100388:	eb 11                	jmp    10039b <schedule+0x14d>
+  100389:	83 b8 28 78 10 00 01 	cmpl   $0x1,0x107828(%eax)
+  100390:	75 ec                	jne    10037e <schedule+0x126>
+  100392:	eb 11                	jmp    1003a5 <schedule+0x14d>
 			}
 		}
 		else{
 			winner = get_winner();
 			while(proc_array[winner].p_state != P_RUNNABLE){
 				winner = get_winner();
-  10038a:	e8 7e fe ff ff       	call   10020d <get_winner>
+  100394:	e8 7e fe ff ff       	call   100217 <get_winner>
 					run(&proc_array[pid]);
 			}
 		}
 		else{
 			winner = get_winner();
 			while(proc_array[winner].p_state != P_RUNNABLE){
-  10038f:	6b c0 5c             	imul   $0x5c,%eax,%eax
-  100392:	83 b8 28 78 10 00 01 	cmpl   $0x1,0x107828(%eax)
-  100399:	75 ef                	jne    10038a <schedule+0x13c>
+  100399:	6b c0 5c             	imul   $0x5c,%eax,%eax
+  10039c:	83 b8 28 78 10 00 01 	cmpl   $0x1,0x107828(%eax)
+  1003a3:	75 ef                	jne    100394 <schedule+0x13c>
 				winner = get_winner();
 			}
 		}
 		run(&proc_array[winner]);
-  10039b:	83 ec 0c             	sub    $0xc,%esp
-  10039e:	05 e0 77 10 00       	add    $0x1077e0,%eax
-  1003a3:	50                   	push   %eax
-  1003a4:	e9 26 ff ff ff       	jmp    1002cf <schedule+0x81>
+  1003a5:	83 ec 0c             	sub    $0xc,%esp
+  1003a8:	05 e0 77 10 00       	add    $0x1077e0,%eax
+  1003ad:	50                   	push   %eax
+  1003ae:	e9 26 ff ff ff       	jmp    1002d9 <schedule+0x81>
 	}
 #endif
 	// If we get here, we are running an unknown scheduling algorithm.
 	cursorpos = console_printf(cursorpos, 0x100, "\nUnknown scheduling algorithm %d\n", scheduling_algorithm);
-  1003a9:	8b 15 00 80 19 00    	mov    0x198000,%edx
-  1003af:	50                   	push   %eax
-  1003b0:	68 e0 0d 10 00       	push   $0x100de0
-  1003b5:	68 00 01 00 00       	push   $0x100
-  1003ba:	52                   	push   %edx
-  1003bb:	e8 72 08 00 00       	call   100c32 <console_printf>
-  1003c0:	83 c4 10             	add    $0x10,%esp
-  1003c3:	a3 00 80 19 00       	mov    %eax,0x198000
-  1003c8:	eb fe                	jmp    1003c8 <schedule+0x17a>
+  1003b3:	8b 15 00 80 19 00    	mov    0x198000,%edx
+  1003b9:	50                   	push   %eax
+  1003ba:	68 00 0e 10 00       	push   $0x100e00
+  1003bf:	68 00 01 00 00       	push   $0x100
+  1003c4:	52                   	push   %edx
+  1003c5:	e8 8c 08 00 00       	call   100c56 <console_printf>
+  1003ca:	83 c4 10             	add    $0x10,%esp
+  1003cd:	a3 00 80 19 00       	mov    %eax,0x198000
+  1003d2:	eb fe                	jmp    1003d2 <schedule+0x17a>
 
-001003ca <interrupt>:
+001003d4 <interrupt>:
  *
  *****************************************************************************/
 
 void
 interrupt(registers_t *reg)
 {
-  1003ca:	57                   	push   %edi
+  1003d4:	57                   	push   %edi
 	// Save the current process's register state
 	// into its process descriptor
 	current->p_registers = *reg;
-  1003cb:	a1 b0 83 10 00       	mov    0x1083b0,%eax
-  1003d0:	b9 11 00 00 00       	mov    $0x11,%ecx
+  1003d5:	a1 b0 83 10 00       	mov    0x1083b0,%eax
+  1003da:	b9 11 00 00 00       	mov    $0x11,%ecx
  *
  *****************************************************************************/
 
 void
 interrupt(registers_t *reg)
 {
-  1003d5:	56                   	push   %esi
-  1003d6:	53                   	push   %ebx
-  1003d7:	8b 5c 24 10          	mov    0x10(%esp),%ebx
+  1003df:	56                   	push   %esi
+  1003e0:	53                   	push   %ebx
+  1003e1:	8b 5c 24 10          	mov    0x10(%esp),%ebx
 	// Save the current process's register state
 	// into its process descriptor
 	current->p_registers = *reg;
-  1003db:	8d 78 04             	lea    0x4(%eax),%edi
-  1003de:	89 de                	mov    %ebx,%esi
-  1003e0:	f3 a5                	rep movsl %ds:(%esi),%es:(%edi)
-
+  1003e5:	8d 78 04             	lea    0x4(%eax),%edi
+  1003e8:	89 de                	mov    %ebx,%esi
+  1003ea:	f3 a5                	rep movsl %ds:(%esi),%es:(%edi)
 	switch (reg->reg_intno) {
-  1003e2:	8b 53 28             	mov    0x28(%ebx),%edx
-  1003e5:	83 ea 20             	sub    $0x20,%edx
-  1003e8:	83 fa 17             	cmp    $0x17,%edx
-  1003eb:	77 7b                	ja     100468 <interrupt+0x9e>
-  1003ed:	ff 24 95 04 0e 10 00 	jmp    *0x100e04(,%edx,4)
+  1003ec:	8b 53 28             	mov    0x28(%ebx),%edx
+  1003ef:	83 ea 20             	sub    $0x20,%edx
+  1003f2:	83 fa 18             	cmp    $0x18,%edx
+  1003f5:	0f 87 92 00 00 00    	ja     10048d <interrupt+0xb9>
+  1003fb:	ff 24 95 24 0e 10 00 	jmp    *0x100e24(,%edx,4)
 
 	case INT_SYS_YIELD:
 		// The 'sys_yield' system call asks the kernel to schedule
 		// the next process.
 		schedule();
-  1003f4:	e8 55 fe ff ff       	call   10024e <schedule>
+  100402:	e8 51 fe ff ff       	call   100258 <schedule>
 		// The application stored its exit status in the %eax register
 		// before calling the system call.  The %eax register has
 		// changed by now, but we can read the application's value
 		// out of the 'reg' argument.
 		// (This shows you how to transfer arguments to system calls!)
 		current->p_state = P_ZOMBIE;
-  1003f9:	a1 b0 83 10 00       	mov    0x1083b0,%eax
+  100407:	a1 b0 83 10 00       	mov    0x1083b0,%eax
 		current->p_exit_status = reg->reg_eax;
-  1003fe:	8b 53 1c             	mov    0x1c(%ebx),%edx
+  10040c:	8b 53 1c             	mov    0x1c(%ebx),%edx
 		// The application stored its exit status in the %eax register
 		// before calling the system call.  The %eax register has
 		// changed by now, but we can read the application's value
 		// out of the 'reg' argument.
 		// (This shows you how to transfer arguments to system calls!)
 		current->p_state = P_ZOMBIE;
-  100401:	c7 40 48 03 00 00 00 	movl   $0x3,0x48(%eax)
+  10040f:	c7 40 48 03 00 00 00 	movl   $0x3,0x48(%eax)
 		current->p_exit_status = reg->reg_eax;
-  100408:	89 50 58             	mov    %edx,0x58(%eax)
+  100416:	89 50 58             	mov    %edx,0x58(%eax)
 		schedule();
-  10040b:	e8 3e fe ff ff       	call   10024e <schedule>
+  100419:	e8 3a fe ff ff       	call   100258 <schedule>
 
 	case INT_SYS_USER1:
 		// 'sys_user*' are provided for your convenience, in case you
 		// want to add a system call.
 		/* Your code here (if you want). */
 		run(current);
-  100410:	83 ec 0c             	sub    $0xc,%esp
-  100413:	eb 4b                	jmp    100460 <interrupt+0x96>
+  10041e:	83 ec 0c             	sub    $0xc,%esp
+  100421:	eb 4b                	jmp    10046e <interrupt+0x9a>
 
 	case INT_SYS_USER2:
 		/* Your code here (if you want). */
 		run(current);
-  100415:	83 ec 0c             	sub    $0xc,%esp
-  100418:	50                   	push   %eax
-  100419:	e8 6f 02 00 00       	call   10068d <run>
+  100423:	83 ec 0c             	sub    $0xc,%esp
+  100426:	50                   	push   %eax
+  100427:	e8 85 02 00 00       	call   1006b1 <run>
 
 	case INT_CLOCK:
 		// A clock interrupt occurred (so an application exhausted its
 		// time quantum).
 		// Switch to the next runnable process.
 		schedule();
-  10041e:	e8 2b fe ff ff       	call   10024e <schedule>
+  10042c:	e8 27 fe ff ff       	call   100258 <schedule>
     
 	case INT_SYS_PRI:
 		current->p_priority = reg->reg_eax;
-  100423:	a1 b0 83 10 00       	mov    0x1083b0,%eax
-  100428:	8b 53 1c             	mov    0x1c(%ebx),%edx
-  10042b:	89 50 4c             	mov    %edx,0x4c(%eax)
-  10042e:	eb e5                	jmp    100415 <interrupt+0x4b>
+  100431:	a1 b0 83 10 00       	mov    0x1083b0,%eax
+  100436:	8b 53 1c             	mov    0x1c(%ebx),%edx
+  100439:	89 50 4c             	mov    %edx,0x4c(%eax)
+  10043c:	eb e5                	jmp    100423 <interrupt+0x4f>
 		run(current);
 
 	case INT_SYS_PROP:
 		current->p_proportional = reg->reg_eax;
-  100430:	8b 53 1c             	mov    0x1c(%ebx),%edx
-  100433:	89 50 50             	mov    %edx,0x50(%eax)
-  100436:	eb dd                	jmp    100415 <interrupt+0x4b>
+  10043e:	8b 53 1c             	mov    0x1c(%ebx),%edx
+  100441:	89 50 50             	mov    %edx,0x50(%eax)
+  100444:	eb dd                	jmp    100423 <interrupt+0x4f>
 		run(current);
 
 	case INT_SYS_GETTICKET:
 		if(ticket_num<MAX_TICKET_NUM){
-  100438:	8b 15 ac 79 10 00    	mov    0x1079ac,%edx
-  10043e:	83 fa 63             	cmp    $0x63,%edx
-  100441:	7f d2                	jg     100415 <interrupt+0x4b>
+  100446:	8b 15 ac 79 10 00    	mov    0x1079ac,%edx
+  10044c:	83 fa 63             	cmp    $0x63,%edx
+  10044f:	7f d2                	jg     100423 <interrupt+0x4f>
 			tickets[ticket_num] = current->p_pid;
-  100443:	8b 08                	mov    (%eax),%ecx
-  100445:	89 0c 95 b0 79 10 00 	mov    %ecx,0x1079b0(,%edx,4)
+  100451:	8b 08                	mov    (%eax),%ecx
+  100453:	89 0c 95 b0 79 10 00 	mov    %ecx,0x1079b0(,%edx,4)
 			ticket_num++;
-  10044c:	42                   	inc    %edx
-  10044d:	89 15 ac 79 10 00    	mov    %edx,0x1079ac
-  100453:	eb c0                	jmp    100415 <interrupt+0x4b>
+  10045a:	42                   	inc    %edx
+  10045b:	89 15 ac 79 10 00    	mov    %edx,0x1079ac
+  100461:	eb c0                	jmp    100423 <interrupt+0x4f>
 		}
 		run(current);
 	case INT_SYS_ABORTTICKET:
 		delete_ticket(current->p_pid);
-  100455:	83 ec 0c             	sub    $0xc,%esp
-  100458:	ff 30                	pushl  (%eax)
-  10045a:	e8 3d fc ff ff       	call   10009c <delete_ticket>
+  100463:	83 ec 0c             	sub    $0xc,%esp
+  100466:	ff 30                	pushl  (%eax)
+  100468:	e8 2f fc ff ff       	call   10009c <delete_ticket>
 		run(current);
-  10045f:	59                   	pop    %ecx
-  100460:	ff 35 b0 83 10 00    	pushl  0x1083b0
-  100466:	eb b1                	jmp    100419 <interrupt+0x4f>
-  100468:	eb fe                	jmp    100468 <interrupt+0x9e>
-  10046a:	90                   	nop
-  10046b:	90                   	nop
+  10046d:	59                   	pop    %ecx
+  10046e:	ff 35 b0 83 10 00    	pushl  0x1083b0
+  100474:	eb b1                	jmp    100427 <interrupt+0x53>
+	case INT_SYS_PRINTCHAR:
+		*cursorpos++ = (uint16_t) reg->reg_eax;
+  100476:	8b 15 00 80 19 00    	mov    0x198000,%edx
+  10047c:	8b 4b 1c             	mov    0x1c(%ebx),%ecx
+  10047f:	66 89 0a             	mov    %cx,(%edx)
+  100482:	83 c2 02             	add    $0x2,%edx
+  100485:	89 15 00 80 19 00    	mov    %edx,0x198000
+  10048b:	eb 96                	jmp    100423 <interrupt+0x4f>
+  10048d:	eb fe                	jmp    10048d <interrupt+0xb9>
+  10048f:	90                   	nop
 
-0010046c <segments_init>:
+00100490 <segments_init>:
 segments_init(void)
 {
 	int i;
 
 	// Set task state segment
 	segments[SEGSEL_TASKSTATE >> 3]
-  10046c:	b8 40 7b 10 00       	mov    $0x107b40,%eax
+  100490:	b8 40 7b 10 00       	mov    $0x107b40,%eax
 	kernel_task_descriptor.ts_ss0 = SEGSEL_KERN_DATA;
 
 	// Set up interrupt descriptor table.
 	// Most interrupts are effectively ignored
 	for (i = 0; i < sizeof(interrupt_descriptors) / sizeof(gatedescriptor_t); i++)
 		SETGATE(interrupt_descriptors[i], 0,
-  100471:	b9 5c 00 10 00       	mov    $0x10005c,%ecx
+  100495:	b9 5c 00 10 00       	mov    $0x10005c,%ecx
 segments_init(void)
 {
 	int i;
 
 	// Set task state segment
 	segments[SEGSEL_TASKSTATE >> 3]
-  100476:	89 c2                	mov    %eax,%edx
-  100478:	c1 ea 10             	shr    $0x10,%edx
+  10049a:	89 c2                	mov    %eax,%edx
+  10049c:	c1 ea 10             	shr    $0x10,%edx
 extern void default_int_handler(void);
 
 
 void
 segments_init(void)
 {
-  10047b:	53                   	push   %ebx
+  10049f:	53                   	push   %ebx
 	kernel_task_descriptor.ts_ss0 = SEGSEL_KERN_DATA;
 
 	// Set up interrupt descriptor table.
 	// Most interrupts are effectively ignored
 	for (i = 0; i < sizeof(interrupt_descriptors) / sizeof(gatedescriptor_t); i++)
 		SETGATE(interrupt_descriptors[i], 0,
-  10047c:	bb 5c 00 10 00       	mov    $0x10005c,%ebx
-  100481:	c1 eb 10             	shr    $0x10,%ebx
+  1004a0:	bb 5c 00 10 00       	mov    $0x10005c,%ebx
+  1004a5:	c1 eb 10             	shr    $0x10,%ebx
 segments_init(void)
 {
 	int i;
 
 	// Set task state segment
 	segments[SEGSEL_TASKSTATE >> 3]
-  100484:	66 a3 3a 10 10 00    	mov    %ax,0x10103a
-  10048a:	c1 e8 18             	shr    $0x18,%eax
-  10048d:	88 15 3c 10 10 00    	mov    %dl,0x10103c
+  1004a8:	66 a3 3a 10 10 00    	mov    %ax,0x10103a
+  1004ae:	c1 e8 18             	shr    $0x18,%eax
+  1004b1:	88 15 3c 10 10 00    	mov    %dl,0x10103c
 	kernel_task_descriptor.ts_ss0 = SEGSEL_KERN_DATA;
 
 	// Set up interrupt descriptor table.
 	// Most interrupts are effectively ignored
 	for (i = 0; i < sizeof(interrupt_descriptors) / sizeof(gatedescriptor_t); i++)
 		SETGATE(interrupt_descriptors[i], 0,
-  100493:	ba a8 7b 10 00       	mov    $0x107ba8,%edx
+  1004b7:	ba a8 7b 10 00       	mov    $0x107ba8,%edx
 segments_init(void)
 {
 	int i;
 
 	// Set task state segment
 	segments[SEGSEL_TASKSTATE >> 3]
-  100498:	a2 3f 10 10 00       	mov    %al,0x10103f
+  1004bc:	a2 3f 10 10 00       	mov    %al,0x10103f
 	kernel_task_descriptor.ts_ss0 = SEGSEL_KERN_DATA;
 
 	// Set up interrupt descriptor table.
 	// Most interrupts are effectively ignored
 	for (i = 0; i < sizeof(interrupt_descriptors) / sizeof(gatedescriptor_t); i++)
 		SETGATE(interrupt_descriptors[i], 0,
-  10049d:	31 c0                	xor    %eax,%eax
+  1004c1:	31 c0                	xor    %eax,%eax
 segments_init(void)
 {
 	int i;
 
 	// Set task state segment
 	segments[SEGSEL_TASKSTATE >> 3]
-  10049f:	66 c7 05 38 10 10 00 	movw   $0x68,0x101038
-  1004a6:	68 00 
-  1004a8:	c6 05 3e 10 10 00 40 	movb   $0x40,0x10103e
+  1004c3:	66 c7 05 38 10 10 00 	movw   $0x68,0x101038
+  1004ca:	68 00 
+  1004cc:	c6 05 3e 10 10 00 40 	movb   $0x40,0x10103e
 		= SEG16(STS_T32A, (uint32_t) &kernel_task_descriptor,
 			sizeof(taskstate_t), 0);
 	segments[SEGSEL_TASKSTATE >> 3].sd_s = 0;
-  1004af:	c6 05 3d 10 10 00 89 	movb   $0x89,0x10103d
+  1004d3:	c6 05 3d 10 10 00 89 	movb   $0x89,0x10103d
 
 	// Set up kernel task descriptor, so we can receive interrupts
 	kernel_task_descriptor.ts_esp0 = KERNEL_STACK_TOP;
-  1004b6:	c7 05 44 7b 10 00 00 	movl   $0x180000,0x107b44
-  1004bd:	00 18 00 
+  1004da:	c7 05 44 7b 10 00 00 	movl   $0x180000,0x107b44
+  1004e1:	00 18 00 
 	kernel_task_descriptor.ts_ss0 = SEGSEL_KERN_DATA;
-  1004c0:	66 c7 05 48 7b 10 00 	movw   $0x10,0x107b48
-  1004c7:	10 00 
+  1004e4:	66 c7 05 48 7b 10 00 	movw   $0x10,0x107b48
+  1004eb:	10 00 
 
 	// Set up interrupt descriptor table.
 	// Most interrupts are effectively ignored
 	for (i = 0; i < sizeof(interrupt_descriptors) / sizeof(gatedescriptor_t); i++)
 		SETGATE(interrupt_descriptors[i], 0,
-  1004c9:	66 89 0c c5 a8 7b 10 	mov    %cx,0x107ba8(,%eax,8)
-  1004d0:	00 
-  1004d1:	66 c7 44 c2 02 08 00 	movw   $0x8,0x2(%edx,%eax,8)
-  1004d8:	c6 44 c2 04 00       	movb   $0x0,0x4(%edx,%eax,8)
-  1004dd:	c6 44 c2 05 8e       	movb   $0x8e,0x5(%edx,%eax,8)
-  1004e2:	66 89 5c c2 06       	mov    %bx,0x6(%edx,%eax,8)
+  1004ed:	66 89 0c c5 a8 7b 10 	mov    %cx,0x107ba8(,%eax,8)
+  1004f4:	00 
+  1004f5:	66 c7 44 c2 02 08 00 	movw   $0x8,0x2(%edx,%eax,8)
+  1004fc:	c6 44 c2 04 00       	movb   $0x0,0x4(%edx,%eax,8)
+  100501:	c6 44 c2 05 8e       	movb   $0x8e,0x5(%edx,%eax,8)
+  100506:	66 89 5c c2 06       	mov    %bx,0x6(%edx,%eax,8)
 	kernel_task_descriptor.ts_esp0 = KERNEL_STACK_TOP;
 	kernel_task_descriptor.ts_ss0 = SEGSEL_KERN_DATA;
 
 	// Set up interrupt descriptor table.
 	// Most interrupts are effectively ignored
 	for (i = 0; i < sizeof(interrupt_descriptors) / sizeof(gatedescriptor_t); i++)
-  1004e7:	40                   	inc    %eax
-  1004e8:	3d 00 01 00 00       	cmp    $0x100,%eax
-  1004ed:	75 da                	jne    1004c9 <segments_init+0x5d>
+  10050b:	40                   	inc    %eax
+  10050c:	3d 00 01 00 00       	cmp    $0x100,%eax
+  100511:	75 da                	jne    1004ed <segments_init+0x5d>
 		SETGATE(interrupt_descriptors[i], 0,
 			SEGSEL_KERN_CODE, default_int_handler, 0);
 
 	// The clock interrupt gets special handling
 	SETGATE(interrupt_descriptors[INT_CLOCK], 0,
-  1004ef:	b8 1a 00 10 00       	mov    $0x10001a,%eax
+  100513:	b8 1a 00 10 00       	mov    $0x10001a,%eax
 
 	// System calls get special handling.
 	// Note that the last argument is '3'.  This means that unprivileged
 	// (level-3) applications may generate these interrupts.
 	for (i = INT_SYS_YIELD; i < INT_SYS_YIELD + 10; i++)
 		SETGATE(interrupt_descriptors[i], 0,
-  1004f4:	ba a8 7b 10 00       	mov    $0x107ba8,%edx
+  100518:	ba a8 7b 10 00       	mov    $0x107ba8,%edx
 	for (i = 0; i < sizeof(interrupt_descriptors) / sizeof(gatedescriptor_t); i++)
 		SETGATE(interrupt_descriptors[i], 0,
 			SEGSEL_KERN_CODE, default_int_handler, 0);
 
 	// The clock interrupt gets special handling
 	SETGATE(interrupt_descriptors[INT_CLOCK], 0,
-  1004f9:	66 a3 a8 7c 10 00    	mov    %ax,0x107ca8
-  1004ff:	c1 e8 10             	shr    $0x10,%eax
-  100502:	66 a3 ae 7c 10 00    	mov    %ax,0x107cae
-  100508:	b8 30 00 00 00       	mov    $0x30,%eax
-  10050d:	66 c7 05 aa 7c 10 00 	movw   $0x8,0x107caa
-  100514:	08 00 
-  100516:	c6 05 ac 7c 10 00 00 	movb   $0x0,0x107cac
-  10051d:	c6 05 ad 7c 10 00 8e 	movb   $0x8e,0x107cad
+  10051d:	66 a3 a8 7c 10 00    	mov    %ax,0x107ca8
+  100523:	c1 e8 10             	shr    $0x10,%eax
+  100526:	66 a3 ae 7c 10 00    	mov    %ax,0x107cae
+  10052c:	b8 30 00 00 00       	mov    $0x30,%eax
+  100531:	66 c7 05 aa 7c 10 00 	movw   $0x8,0x107caa
+  100538:	08 00 
+  10053a:	c6 05 ac 7c 10 00 00 	movb   $0x0,0x107cac
+  100541:	c6 05 ad 7c 10 00 8e 	movb   $0x8e,0x107cad
 
 	// System calls get special handling.
 	// Note that the last argument is '3'.  This means that unprivileged
 	// (level-3) applications may generate these interrupts.
 	for (i = INT_SYS_YIELD; i < INT_SYS_YIELD + 10; i++)
 		SETGATE(interrupt_descriptors[i], 0,
-  100524:	8b 0c 85 b2 ff 0f 00 	mov    0xfffb2(,%eax,4),%ecx
-  10052b:	66 c7 44 c2 02 08 00 	movw   $0x8,0x2(%edx,%eax,8)
-  100532:	66 89 0c c5 a8 7b 10 	mov    %cx,0x107ba8(,%eax,8)
-  100539:	00 
-  10053a:	c1 e9 10             	shr    $0x10,%ecx
-  10053d:	c6 44 c2 04 00       	movb   $0x0,0x4(%edx,%eax,8)
-  100542:	c6 44 c2 05 ee       	movb   $0xee,0x5(%edx,%eax,8)
-  100547:	66 89 4c c2 06       	mov    %cx,0x6(%edx,%eax,8)
+  100548:	8b 0c 85 b2 ff 0f 00 	mov    0xfffb2(,%eax,4),%ecx
+  10054f:	66 c7 44 c2 02 08 00 	movw   $0x8,0x2(%edx,%eax,8)
+  100556:	66 89 0c c5 a8 7b 10 	mov    %cx,0x107ba8(,%eax,8)
+  10055d:	00 
+  10055e:	c1 e9 10             	shr    $0x10,%ecx
+  100561:	c6 44 c2 04 00       	movb   $0x0,0x4(%edx,%eax,8)
+  100566:	c6 44 c2 05 ee       	movb   $0xee,0x5(%edx,%eax,8)
+  10056b:	66 89 4c c2 06       	mov    %cx,0x6(%edx,%eax,8)
 		SEGSEL_KERN_CODE, clock_int_handler, 0);
 
 	// System calls get special handling.
 	// Note that the last argument is '3'.  This means that unprivileged
 	// (level-3) applications may generate these interrupts.
 	for (i = INT_SYS_YIELD; i < INT_SYS_YIELD + 10; i++)
-  10054c:	40                   	inc    %eax
-  10054d:	83 f8 3a             	cmp    $0x3a,%eax
-  100550:	75 d2                	jne    100524 <segments_init+0xb8>
+  100570:	40                   	inc    %eax
+  100571:	83 f8 3a             	cmp    $0x3a,%eax
+  100574:	75 d2                	jne    100548 <segments_init+0xb8>
 		SETGATE(interrupt_descriptors[i], 0,
 			SEGSEL_KERN_CODE, sys_int_handlers[i - INT_SYS_YIELD], 3);
 
 	// Reload segment pointers
 	asm volatile("lgdt global_descriptor_table\n\t"
-  100552:	b0 28                	mov    $0x28,%al
-  100554:	0f 01 15 00 10 10 00 	lgdtl  0x101000
-  10055b:	0f 00 d8             	ltr    %ax
-  10055e:	0f 01 1d 08 10 10 00 	lidtl  0x101008
+  100576:	b0 28                	mov    $0x28,%al
+  100578:	0f 01 15 00 10 10 00 	lgdtl  0x101000
+  10057f:	0f 00 d8             	ltr    %ax
+  100582:	0f 01 1d 08 10 10 00 	lidtl  0x101008
 		     "lidt interrupt_descriptor_table"
 		     : : "r" ((uint16_t) SEGSEL_TASKSTATE));
 
 	// Convince compiler that all symbols were used
 	(void) global_descriptor_table, (void) interrupt_descriptor_table;
 }
-  100565:	5b                   	pop    %ebx
-  100566:	c3                   	ret    
+  100589:	5b                   	pop    %ebx
+  10058a:	c3                   	ret    
 
-00100567 <interrupt_controller_init>:
+0010058b <interrupt_controller_init>:
 #define	TIMER_FREQ	1193182
 #define TIMER_DIV(x)	((TIMER_FREQ+(x)/2)/(x))
 
 void
 interrupt_controller_init(bool_t allow_clock_interrupt)
 {
-  100567:	55                   	push   %ebp
+  10058b:	55                   	push   %ebp
 }
 
 static inline void
 outb(int port, uint8_t data)
 {
 	asm volatile("outb %0,%w1" : : "a" (data), "d" (port));
-  100568:	b0 ff                	mov    $0xff,%al
-  10056a:	57                   	push   %edi
-  10056b:	56                   	push   %esi
-  10056c:	53                   	push   %ebx
-  10056d:	bb 21 00 00 00       	mov    $0x21,%ebx
-  100572:	89 da                	mov    %ebx,%edx
-  100574:	ee                   	out    %al,(%dx)
-  100575:	b9 a1 00 00 00       	mov    $0xa1,%ecx
-  10057a:	89 ca                	mov    %ecx,%edx
-  10057c:	ee                   	out    %al,(%dx)
-  10057d:	be 11 00 00 00       	mov    $0x11,%esi
-  100582:	bf 20 00 00 00       	mov    $0x20,%edi
-  100587:	89 f0                	mov    %esi,%eax
-  100589:	89 fa                	mov    %edi,%edx
-  10058b:	ee                   	out    %al,(%dx)
-  10058c:	b0 20                	mov    $0x20,%al
-  10058e:	89 da                	mov    %ebx,%edx
-  100590:	ee                   	out    %al,(%dx)
-  100591:	b0 04                	mov    $0x4,%al
-  100593:	ee                   	out    %al,(%dx)
-  100594:	b0 03                	mov    $0x3,%al
-  100596:	ee                   	out    %al,(%dx)
-  100597:	bd a0 00 00 00       	mov    $0xa0,%ebp
-  10059c:	89 f0                	mov    %esi,%eax
-  10059e:	89 ea                	mov    %ebp,%edx
+  10058c:	b0 ff                	mov    $0xff,%al
+  10058e:	57                   	push   %edi
+  10058f:	56                   	push   %esi
+  100590:	53                   	push   %ebx
+  100591:	bb 21 00 00 00       	mov    $0x21,%ebx
+  100596:	89 da                	mov    %ebx,%edx
+  100598:	ee                   	out    %al,(%dx)
+  100599:	b9 a1 00 00 00       	mov    $0xa1,%ecx
+  10059e:	89 ca                	mov    %ecx,%edx
   1005a0:	ee                   	out    %al,(%dx)
-  1005a1:	b0 28                	mov    $0x28,%al
-  1005a3:	89 ca                	mov    %ecx,%edx
-  1005a5:	ee                   	out    %al,(%dx)
-  1005a6:	b0 02                	mov    $0x2,%al
-  1005a8:	ee                   	out    %al,(%dx)
-  1005a9:	b0 01                	mov    $0x1,%al
-  1005ab:	ee                   	out    %al,(%dx)
-  1005ac:	b0 68                	mov    $0x68,%al
-  1005ae:	89 fa                	mov    %edi,%edx
-  1005b0:	ee                   	out    %al,(%dx)
-  1005b1:	be 0a 00 00 00       	mov    $0xa,%esi
-  1005b6:	89 f0                	mov    %esi,%eax
-  1005b8:	ee                   	out    %al,(%dx)
-  1005b9:	b0 68                	mov    $0x68,%al
-  1005bb:	89 ea                	mov    %ebp,%edx
-  1005bd:	ee                   	out    %al,(%dx)
-  1005be:	89 f0                	mov    %esi,%eax
-  1005c0:	ee                   	out    %al,(%dx)
+  1005a1:	be 11 00 00 00       	mov    $0x11,%esi
+  1005a6:	bf 20 00 00 00       	mov    $0x20,%edi
+  1005ab:	89 f0                	mov    %esi,%eax
+  1005ad:	89 fa                	mov    %edi,%edx
+  1005af:	ee                   	out    %al,(%dx)
+  1005b0:	b0 20                	mov    $0x20,%al
+  1005b2:	89 da                	mov    %ebx,%edx
+  1005b4:	ee                   	out    %al,(%dx)
+  1005b5:	b0 04                	mov    $0x4,%al
+  1005b7:	ee                   	out    %al,(%dx)
+  1005b8:	b0 03                	mov    $0x3,%al
+  1005ba:	ee                   	out    %al,(%dx)
+  1005bb:	bd a0 00 00 00       	mov    $0xa0,%ebp
+  1005c0:	89 f0                	mov    %esi,%eax
+  1005c2:	89 ea                	mov    %ebp,%edx
+  1005c4:	ee                   	out    %al,(%dx)
+  1005c5:	b0 28                	mov    $0x28,%al
+  1005c7:	89 ca                	mov    %ecx,%edx
+  1005c9:	ee                   	out    %al,(%dx)
+  1005ca:	b0 02                	mov    $0x2,%al
+  1005cc:	ee                   	out    %al,(%dx)
+  1005cd:	b0 01                	mov    $0x1,%al
+  1005cf:	ee                   	out    %al,(%dx)
+  1005d0:	b0 68                	mov    $0x68,%al
+  1005d2:	89 fa                	mov    %edi,%edx
+  1005d4:	ee                   	out    %al,(%dx)
+  1005d5:	be 0a 00 00 00       	mov    $0xa,%esi
+  1005da:	89 f0                	mov    %esi,%eax
+  1005dc:	ee                   	out    %al,(%dx)
+  1005dd:	b0 68                	mov    $0x68,%al
+  1005df:	89 ea                	mov    %ebp,%edx
+  1005e1:	ee                   	out    %al,(%dx)
+  1005e2:	89 f0                	mov    %esi,%eax
+  1005e4:	ee                   	out    %al,(%dx)
 
 	outb(IO_PIC2, 0x68);               /* OCW3 */
 	outb(IO_PIC2, 0x0a);               /* OCW3 */
 
 	// mask all interrupts again, except possibly for clock interrupt
 	outb(IO_PIC1+1, (allow_clock_interrupt ? 0xFE : 0xFF));
-  1005c1:	83 7c 24 14 01       	cmpl   $0x1,0x14(%esp)
-  1005c6:	89 da                	mov    %ebx,%edx
-  1005c8:	19 c0                	sbb    %eax,%eax
-  1005ca:	f7 d0                	not    %eax
-  1005cc:	05 ff 00 00 00       	add    $0xff,%eax
-  1005d1:	ee                   	out    %al,(%dx)
-  1005d2:	b0 ff                	mov    $0xff,%al
-  1005d4:	89 ca                	mov    %ecx,%edx
-  1005d6:	ee                   	out    %al,(%dx)
+  1005e5:	83 7c 24 14 01       	cmpl   $0x1,0x14(%esp)
+  1005ea:	89 da                	mov    %ebx,%edx
+  1005ec:	19 c0                	sbb    %eax,%eax
+  1005ee:	f7 d0                	not    %eax
+  1005f0:	05 ff 00 00 00       	add    $0xff,%eax
+  1005f5:	ee                   	out    %al,(%dx)
+  1005f6:	b0 ff                	mov    $0xff,%al
+  1005f8:	89 ca                	mov    %ecx,%edx
+  1005fa:	ee                   	out    %al,(%dx)
 	outb(IO_PIC2+1, 0xFF);
 
 	// if the clock interrupt is allowed, initialize the clock
 	if (allow_clock_interrupt) {
-  1005d7:	83 7c 24 14 00       	cmpl   $0x0,0x14(%esp)
-  1005dc:	74 0d                	je     1005eb <interrupt_controller_init+0x84>
-  1005de:	b2 43                	mov    $0x43,%dl
-  1005e0:	b0 34                	mov    $0x34,%al
-  1005e2:	ee                   	out    %al,(%dx)
-  1005e3:	b0 9c                	mov    $0x9c,%al
-  1005e5:	b2 40                	mov    $0x40,%dl
-  1005e7:	ee                   	out    %al,(%dx)
-  1005e8:	b0 2e                	mov    $0x2e,%al
-  1005ea:	ee                   	out    %al,(%dx)
+  1005fb:	83 7c 24 14 00       	cmpl   $0x0,0x14(%esp)
+  100600:	74 0d                	je     10060f <interrupt_controller_init+0x84>
+  100602:	b2 43                	mov    $0x43,%dl
+  100604:	b0 34                	mov    $0x34,%al
+  100606:	ee                   	out    %al,(%dx)
+  100607:	b0 55                	mov    $0x55,%al
+  100609:	b2 40                	mov    $0x40,%dl
+  10060b:	ee                   	out    %al,(%dx)
+  10060c:	b0 02                	mov    $0x2,%al
+  10060e:	ee                   	out    %al,(%dx)
 		outb(TIMER_MODE, TIMER_SEL0 | TIMER_RATEGEN | TIMER_16BIT);
 		outb(IO_TIMER1, TIMER_DIV(HZ) % 256);
 		outb(IO_TIMER1, TIMER_DIV(HZ) / 256);
 	}
 }
-  1005eb:	5b                   	pop    %ebx
-  1005ec:	5e                   	pop    %esi
-  1005ed:	5f                   	pop    %edi
-  1005ee:	5d                   	pop    %ebp
-  1005ef:	c3                   	ret    
+  10060f:	5b                   	pop    %ebx
+  100610:	5e                   	pop    %esi
+  100611:	5f                   	pop    %edi
+  100612:	5d                   	pop    %ebp
+  100613:	c3                   	ret    
 
-001005f0 <console_clear>:
+00100614 <console_clear>:
  *
  *****************************************************************************/
 
 void
 console_clear(void)
 {
-  1005f0:	56                   	push   %esi
+  100614:	56                   	push   %esi
 	int i;
 	cursorpos = (uint16_t *) 0xB8000;
-  1005f1:	31 c0                	xor    %eax,%eax
+  100615:	31 c0                	xor    %eax,%eax
  *
  *****************************************************************************/
 
 void
 console_clear(void)
 {
-  1005f3:	53                   	push   %ebx
+  100617:	53                   	push   %ebx
 	int i;
 	cursorpos = (uint16_t *) 0xB8000;
-  1005f4:	c7 05 00 80 19 00 00 	movl   $0xb8000,0x198000
-  1005fb:	80 0b 00 
+  100618:	c7 05 00 80 19 00 00 	movl   $0xb8000,0x198000
+  10061f:	80 0b 00 
 
 	for (i = 0; i < 80 * 25; i++)
 		cursorpos[i] = ' ' | 0x0700;
-  1005fe:	8b 15 00 80 19 00    	mov    0x198000,%edx
-  100604:	66 c7 04 02 20 07    	movw   $0x720,(%edx,%eax,1)
-  10060a:	83 c0 02             	add    $0x2,%eax
+  100622:	8b 15 00 80 19 00    	mov    0x198000,%edx
+  100628:	66 c7 04 02 20 07    	movw   $0x720,(%edx,%eax,1)
+  10062e:	83 c0 02             	add    $0x2,%eax
 console_clear(void)
 {
 	int i;
 	cursorpos = (uint16_t *) 0xB8000;
 
 	for (i = 0; i < 80 * 25; i++)
-  10060d:	3d a0 0f 00 00       	cmp    $0xfa0,%eax
-  100612:	75 ea                	jne    1005fe <console_clear+0xe>
-  100614:	be d4 03 00 00       	mov    $0x3d4,%esi
-  100619:	b0 0e                	mov    $0xe,%al
-  10061b:	89 f2                	mov    %esi,%edx
-  10061d:	ee                   	out    %al,(%dx)
-  10061e:	31 c9                	xor    %ecx,%ecx
-  100620:	bb d5 03 00 00       	mov    $0x3d5,%ebx
-  100625:	88 c8                	mov    %cl,%al
-  100627:	89 da                	mov    %ebx,%edx
-  100629:	ee                   	out    %al,(%dx)
-  10062a:	b0 0f                	mov    $0xf,%al
-  10062c:	89 f2                	mov    %esi,%edx
-  10062e:	ee                   	out    %al,(%dx)
-  10062f:	88 c8                	mov    %cl,%al
-  100631:	89 da                	mov    %ebx,%edx
-  100633:	ee                   	out    %al,(%dx)
+  100631:	3d a0 0f 00 00       	cmp    $0xfa0,%eax
+  100636:	75 ea                	jne    100622 <console_clear+0xe>
+  100638:	be d4 03 00 00       	mov    $0x3d4,%esi
+  10063d:	b0 0e                	mov    $0xe,%al
+  10063f:	89 f2                	mov    %esi,%edx
+  100641:	ee                   	out    %al,(%dx)
+  100642:	31 c9                	xor    %ecx,%ecx
+  100644:	bb d5 03 00 00       	mov    $0x3d5,%ebx
+  100649:	88 c8                	mov    %cl,%al
+  10064b:	89 da                	mov    %ebx,%edx
+  10064d:	ee                   	out    %al,(%dx)
+  10064e:	b0 0f                	mov    $0xf,%al
+  100650:	89 f2                	mov    %esi,%edx
+  100652:	ee                   	out    %al,(%dx)
+  100653:	88 c8                	mov    %cl,%al
+  100655:	89 da                	mov    %ebx,%edx
+  100657:	ee                   	out    %al,(%dx)
 		cursorpos[i] = ' ' | 0x0700;
 	outb(0x3D4, 14);
 	outb(0x3D5, 0 / 256);
 	outb(0x3D4, 15);
 	outb(0x3D5, 0 % 256);
 }
-  100634:	5b                   	pop    %ebx
-  100635:	5e                   	pop    %esi
-  100636:	c3                   	ret    
+  100658:	5b                   	pop    %ebx
+  100659:	5e                   	pop    %esi
+  10065a:	c3                   	ret    
 
-00100637 <console_read_digit>:
+0010065b <console_read_digit>:
 
 static inline uint8_t
 inb(int port)
 {
 	uint8_t data;
 	asm volatile("inb %w1,%0" : "=a" (data) : "d" (port));
-  100637:	ba 64 00 00 00       	mov    $0x64,%edx
-  10063c:	ec                   	in     (%dx),%al
+  10065b:	ba 64 00 00 00       	mov    $0x64,%edx
+  100660:	ec                   	in     (%dx),%al
 int
 console_read_digit(void)
 {
 	uint8_t data;
 
 	if ((inb(KBSTATP) & KBS_DIB) == 0)
-  10063d:	a8 01                	test   $0x1,%al
-  10063f:	74 45                	je     100686 <console_read_digit+0x4f>
-  100641:	b2 60                	mov    $0x60,%dl
-  100643:	ec                   	in     (%dx),%al
+  100661:	a8 01                	test   $0x1,%al
+  100663:	74 45                	je     1006aa <console_read_digit+0x4f>
+  100665:	b2 60                	mov    $0x60,%dl
+  100667:	ec                   	in     (%dx),%al
 		return -1;
 
 	data = inb(KBDATAP);
 	if (data >= 0x02 && data <= 0x0A)
-  100644:	8d 50 fe             	lea    -0x2(%eax),%edx
-  100647:	80 fa 08             	cmp    $0x8,%dl
-  10064a:	77 05                	ja     100651 <console_read_digit+0x1a>
+  100668:	8d 50 fe             	lea    -0x2(%eax),%edx
+  10066b:	80 fa 08             	cmp    $0x8,%dl
+  10066e:	77 05                	ja     100675 <console_read_digit+0x1a>
 		return data - 0x02 + 1;
-  10064c:	0f b6 c0             	movzbl %al,%eax
-  10064f:	48                   	dec    %eax
-  100650:	c3                   	ret    
+  100670:	0f b6 c0             	movzbl %al,%eax
+  100673:	48                   	dec    %eax
+  100674:	c3                   	ret    
 	else if (data == 0x0B)
-  100651:	3c 0b                	cmp    $0xb,%al
-  100653:	74 35                	je     10068a <console_read_digit+0x53>
+  100675:	3c 0b                	cmp    $0xb,%al
+  100677:	74 35                	je     1006ae <console_read_digit+0x53>
 		return 0;
 	else if (data >= 0x47 && data <= 0x49)
-  100655:	8d 50 b9             	lea    -0x47(%eax),%edx
-  100658:	80 fa 02             	cmp    $0x2,%dl
-  10065b:	77 07                	ja     100664 <console_read_digit+0x2d>
+  100679:	8d 50 b9             	lea    -0x47(%eax),%edx
+  10067c:	80 fa 02             	cmp    $0x2,%dl
+  10067f:	77 07                	ja     100688 <console_read_digit+0x2d>
 		return data - 0x47 + 7;
-  10065d:	0f b6 c0             	movzbl %al,%eax
-  100660:	83 e8 40             	sub    $0x40,%eax
-  100663:	c3                   	ret    
+  100681:	0f b6 c0             	movzbl %al,%eax
+  100684:	83 e8 40             	sub    $0x40,%eax
+  100687:	c3                   	ret    
 	else if (data >= 0x4B && data <= 0x4D)
-  100664:	8d 50 b5             	lea    -0x4b(%eax),%edx
-  100667:	80 fa 02             	cmp    $0x2,%dl
-  10066a:	77 07                	ja     100673 <console_read_digit+0x3c>
+  100688:	8d 50 b5             	lea    -0x4b(%eax),%edx
+  10068b:	80 fa 02             	cmp    $0x2,%dl
+  10068e:	77 07                	ja     100697 <console_read_digit+0x3c>
 		return data - 0x4B + 4;
-  10066c:	0f b6 c0             	movzbl %al,%eax
-  10066f:	83 e8 47             	sub    $0x47,%eax
-  100672:	c3                   	ret    
+  100690:	0f b6 c0             	movzbl %al,%eax
+  100693:	83 e8 47             	sub    $0x47,%eax
+  100696:	c3                   	ret    
 	else if (data >= 0x4F && data <= 0x51)
-  100673:	8d 50 b1             	lea    -0x4f(%eax),%edx
-  100676:	80 fa 02             	cmp    $0x2,%dl
-  100679:	77 07                	ja     100682 <console_read_digit+0x4b>
+  100697:	8d 50 b1             	lea    -0x4f(%eax),%edx
+  10069a:	80 fa 02             	cmp    $0x2,%dl
+  10069d:	77 07                	ja     1006a6 <console_read_digit+0x4b>
 		return data - 0x4F + 1;
-  10067b:	0f b6 c0             	movzbl %al,%eax
-  10067e:	83 e8 4e             	sub    $0x4e,%eax
-  100681:	c3                   	ret    
+  10069f:	0f b6 c0             	movzbl %al,%eax
+  1006a2:	83 e8 4e             	sub    $0x4e,%eax
+  1006a5:	c3                   	ret    
 	else if (data == 0x53)
-  100682:	3c 53                	cmp    $0x53,%al
-  100684:	74 04                	je     10068a <console_read_digit+0x53>
-  100686:	83 c8 ff             	or     $0xffffffff,%eax
-  100689:	c3                   	ret    
-  10068a:	31 c0                	xor    %eax,%eax
+  1006a6:	3c 53                	cmp    $0x53,%al
+  1006a8:	74 04                	je     1006ae <console_read_digit+0x53>
+  1006aa:	83 c8 ff             	or     $0xffffffff,%eax
+  1006ad:	c3                   	ret    
+  1006ae:	31 c0                	xor    %eax,%eax
 		return 0;
 	else
 		return -1;
 }
-  10068c:	c3                   	ret    
+  1006b0:	c3                   	ret    
 
-0010068d <run>:
+001006b1 <run>:
  *
  *****************************************************************************/
 
 void
 run(process_t *proc)
 {
-  10068d:	8b 44 24 04          	mov    0x4(%esp),%eax
+  1006b1:	8b 44 24 04          	mov    0x4(%esp),%eax
 	current = proc;
-  100691:	a3 b0 83 10 00       	mov    %eax,0x1083b0
+  1006b5:	a3 b0 83 10 00       	mov    %eax,0x1083b0
 
 	asm volatile("movl %0,%%esp\n\t"
-  100696:	83 c0 04             	add    $0x4,%eax
-  100699:	89 c4                	mov    %eax,%esp
-  10069b:	61                   	popa   
-  10069c:	07                   	pop    %es
-  10069d:	1f                   	pop    %ds
-  10069e:	83 c4 08             	add    $0x8,%esp
-  1006a1:	cf                   	iret   
-  1006a2:	eb fe                	jmp    1006a2 <run+0x15>
+  1006ba:	83 c0 04             	add    $0x4,%eax
+  1006bd:	89 c4                	mov    %eax,%esp
+  1006bf:	61                   	popa   
+  1006c0:	07                   	pop    %es
+  1006c1:	1f                   	pop    %ds
+  1006c2:	83 c4 08             	add    $0x8,%esp
+  1006c5:	cf                   	iret   
+  1006c6:	eb fe                	jmp    1006c6 <run+0x15>
 
-001006a4 <special_registers_init>:
+001006c8 <special_registers_init>:
  *
  *****************************************************************************/
 
 void
 special_registers_init(process_t *proc)
 {
-  1006a4:	53                   	push   %ebx
-  1006a5:	83 ec 0c             	sub    $0xc,%esp
-  1006a8:	8b 5c 24 14          	mov    0x14(%esp),%ebx
+  1006c8:	53                   	push   %ebx
+  1006c9:	83 ec 0c             	sub    $0xc,%esp
+  1006cc:	8b 5c 24 14          	mov    0x14(%esp),%ebx
 	memset(&proc->p_registers, 0, sizeof(registers_t));
-  1006ac:	6a 44                	push   $0x44
-  1006ae:	6a 00                	push   $0x0
-  1006b0:	8d 43 04             	lea    0x4(%ebx),%eax
-  1006b3:	50                   	push   %eax
-  1006b4:	e8 17 01 00 00       	call   1007d0 <memset>
+  1006d0:	6a 44                	push   $0x44
+  1006d2:	6a 00                	push   $0x0
+  1006d4:	8d 43 04             	lea    0x4(%ebx),%eax
+  1006d7:	50                   	push   %eax
+  1006d8:	e8 17 01 00 00       	call   1007f4 <memset>
 	proc->p_registers.reg_cs = SEGSEL_APP_CODE | 3;
-  1006b9:	66 c7 43 38 1b 00    	movw   $0x1b,0x38(%ebx)
+  1006dd:	66 c7 43 38 1b 00    	movw   $0x1b,0x38(%ebx)
 	proc->p_registers.reg_ds = SEGSEL_APP_DATA | 3;
-  1006bf:	66 c7 43 28 23 00    	movw   $0x23,0x28(%ebx)
+  1006e3:	66 c7 43 28 23 00    	movw   $0x23,0x28(%ebx)
 	proc->p_registers.reg_es = SEGSEL_APP_DATA | 3;
-  1006c5:	66 c7 43 24 23 00    	movw   $0x23,0x24(%ebx)
+  1006e9:	66 c7 43 24 23 00    	movw   $0x23,0x24(%ebx)
 	proc->p_registers.reg_ss = SEGSEL_APP_DATA | 3;
-  1006cb:	66 c7 43 44 23 00    	movw   $0x23,0x44(%ebx)
+  1006ef:	66 c7 43 44 23 00    	movw   $0x23,0x44(%ebx)
 	// Enable interrupts
 	proc->p_registers.reg_eflags = EFLAGS_IF;
-  1006d1:	c7 43 3c 00 02 00 00 	movl   $0x200,0x3c(%ebx)
+  1006f5:	c7 43 3c 00 02 00 00 	movl   $0x200,0x3c(%ebx)
 }
-  1006d8:	83 c4 18             	add    $0x18,%esp
-  1006db:	5b                   	pop    %ebx
-  1006dc:	c3                   	ret    
-  1006dd:	90                   	nop
-  1006de:	90                   	nop
-  1006df:	90                   	nop
+  1006fc:	83 c4 18             	add    $0x18,%esp
+  1006ff:	5b                   	pop    %ebx
+  100700:	c3                   	ret    
+  100701:	90                   	nop
+  100702:	90                   	nop
+  100703:	90                   	nop
 
-001006e0 <program_loader>:
+00100704 <program_loader>:
 		    uint32_t filesz, uint32_t memsz);
 static void loader_panic(void);
 
 void
 program_loader(int program_id, uint32_t *entry_point)
 {
-  1006e0:	55                   	push   %ebp
-  1006e1:	57                   	push   %edi
-  1006e2:	56                   	push   %esi
-  1006e3:	53                   	push   %ebx
-  1006e4:	83 ec 1c             	sub    $0x1c,%esp
-  1006e7:	8b 44 24 30          	mov    0x30(%esp),%eax
+  100704:	55                   	push   %ebp
+  100705:	57                   	push   %edi
+  100706:	56                   	push   %esi
+  100707:	53                   	push   %ebx
+  100708:	83 ec 1c             	sub    $0x1c,%esp
+  10070b:	8b 44 24 30          	mov    0x30(%esp),%eax
 	struct Proghdr *ph, *eph;
 	struct Elf *elf_header;
 	int nprograms = sizeof(ramimages) / sizeof(ramimages[0]);
 
 	if (program_id < 0 || program_id >= nprograms)
-  1006eb:	83 f8 03             	cmp    $0x3,%eax
-  1006ee:	7f 04                	jg     1006f4 <program_loader+0x14>
-  1006f0:	85 c0                	test   %eax,%eax
-  1006f2:	79 02                	jns    1006f6 <program_loader+0x16>
-  1006f4:	eb fe                	jmp    1006f4 <program_loader+0x14>
+  10070f:	83 f8 03             	cmp    $0x3,%eax
+  100712:	7f 04                	jg     100718 <program_loader+0x14>
+  100714:	85 c0                	test   %eax,%eax
+  100716:	79 02                	jns    10071a <program_loader+0x16>
+  100718:	eb fe                	jmp    100718 <program_loader+0x14>
 		loader_panic();
 
 	// is this a valid ELF?
 	elf_header = (struct Elf *) ramimages[program_id].begin;
-  1006f6:	8b 34 c5 40 10 10 00 	mov    0x101040(,%eax,8),%esi
+  10071a:	8b 34 c5 40 10 10 00 	mov    0x101040(,%eax,8),%esi
 	if (elf_header->e_magic != ELF_MAGIC)
-  1006fd:	81 3e 7f 45 4c 46    	cmpl   $0x464c457f,(%esi)
-  100703:	74 02                	je     100707 <program_loader+0x27>
-  100705:	eb fe                	jmp    100705 <program_loader+0x25>
+  100721:	81 3e 7f 45 4c 46    	cmpl   $0x464c457f,(%esi)
+  100727:	74 02                	je     10072b <program_loader+0x27>
+  100729:	eb fe                	jmp    100729 <program_loader+0x25>
 		loader_panic();
 
 	// load each program segment (ignores ph flags)
 	ph = (struct Proghdr*) ((const uint8_t *) elf_header + elf_header->e_phoff);
-  100707:	8b 5e 1c             	mov    0x1c(%esi),%ebx
+  10072b:	8b 5e 1c             	mov    0x1c(%esi),%ebx
 	eph = ph + elf_header->e_phnum;
-  10070a:	0f b7 6e 2c          	movzwl 0x2c(%esi),%ebp
+  10072e:	0f b7 6e 2c          	movzwl 0x2c(%esi),%ebp
 	elf_header = (struct Elf *) ramimages[program_id].begin;
 	if (elf_header->e_magic != ELF_MAGIC)
 		loader_panic();
 
 	// load each program segment (ignores ph flags)
 	ph = (struct Proghdr*) ((const uint8_t *) elf_header + elf_header->e_phoff);
-  10070e:	01 f3                	add    %esi,%ebx
+  100732:	01 f3                	add    %esi,%ebx
 	eph = ph + elf_header->e_phnum;
-  100710:	c1 e5 05             	shl    $0x5,%ebp
-  100713:	8d 2c 2b             	lea    (%ebx,%ebp,1),%ebp
+  100734:	c1 e5 05             	shl    $0x5,%ebp
+  100737:	8d 2c 2b             	lea    (%ebx,%ebp,1),%ebp
 	for (; ph < eph; ph++)
-  100716:	eb 3f                	jmp    100757 <program_loader+0x77>
+  10073a:	eb 3f                	jmp    10077b <program_loader+0x77>
 		if (ph->p_type == ELF_PROG_LOAD)
-  100718:	83 3b 01             	cmpl   $0x1,(%ebx)
-  10071b:	75 37                	jne    100754 <program_loader+0x74>
+  10073c:	83 3b 01             	cmpl   $0x1,(%ebx)
+  10073f:	75 37                	jne    100778 <program_loader+0x74>
 			copyseg((void *) ph->p_va,
-  10071d:	8b 43 08             	mov    0x8(%ebx),%eax
+  100741:	8b 43 08             	mov    0x8(%ebx),%eax
 // then clear the memory from 'va+filesz' up to 'va+memsz' (set it to 0).
 static void
 copyseg(void *dst, const uint8_t *src, uint32_t filesz, uint32_t memsz)
 {
 	uint32_t va = (uint32_t) dst;
 	uint32_t end_va = va + filesz;
-  100720:	8b 7b 10             	mov    0x10(%ebx),%edi
+  100744:	8b 7b 10             	mov    0x10(%ebx),%edi
 	memsz += va;
-  100723:	8b 53 14             	mov    0x14(%ebx),%edx
+  100747:	8b 53 14             	mov    0x14(%ebx),%edx
 // then clear the memory from 'va+filesz' up to 'va+memsz' (set it to 0).
 static void
 copyseg(void *dst, const uint8_t *src, uint32_t filesz, uint32_t memsz)
 {
 	uint32_t va = (uint32_t) dst;
 	uint32_t end_va = va + filesz;
-  100726:	01 c7                	add    %eax,%edi
+  10074a:	01 c7                	add    %eax,%edi
 	memsz += va;
-  100728:	01 c2                	add    %eax,%edx
+  10074c:	01 c2                	add    %eax,%edx
 	va &= ~(PAGESIZE - 1);		// round to page boundary
-  10072a:	25 00 f0 ff ff       	and    $0xfffff000,%eax
+  10074e:	25 00 f0 ff ff       	and    $0xfffff000,%eax
 static void
 copyseg(void *dst, const uint8_t *src, uint32_t filesz, uint32_t memsz)
 {
 	uint32_t va = (uint32_t) dst;
 	uint32_t end_va = va + filesz;
 	memsz += va;
-  10072f:	89 54 24 0c          	mov    %edx,0xc(%esp)
+  100753:	89 54 24 0c          	mov    %edx,0xc(%esp)
 	va &= ~(PAGESIZE - 1);		// round to page boundary
 
 	// copy data
 	memcpy((uint8_t *) va, src, end_va - va);
-  100733:	52                   	push   %edx
-  100734:	89 fa                	mov    %edi,%edx
-  100736:	29 c2                	sub    %eax,%edx
-  100738:	52                   	push   %edx
-  100739:	8b 53 04             	mov    0x4(%ebx),%edx
-  10073c:	01 f2                	add    %esi,%edx
-  10073e:	52                   	push   %edx
-  10073f:	50                   	push   %eax
-  100740:	e8 27 00 00 00       	call   10076c <memcpy>
-  100745:	83 c4 10             	add    $0x10,%esp
-  100748:	eb 04                	jmp    10074e <program_loader+0x6e>
+  100757:	52                   	push   %edx
+  100758:	89 fa                	mov    %edi,%edx
+  10075a:	29 c2                	sub    %eax,%edx
+  10075c:	52                   	push   %edx
+  10075d:	8b 53 04             	mov    0x4(%ebx),%edx
+  100760:	01 f2                	add    %esi,%edx
+  100762:	52                   	push   %edx
+  100763:	50                   	push   %eax
+  100764:	e8 27 00 00 00       	call   100790 <memcpy>
+  100769:	83 c4 10             	add    $0x10,%esp
+  10076c:	eb 04                	jmp    100772 <program_loader+0x6e>
 
 	// clear bss segment
 	while (end_va < memsz)
 		*((uint8_t *) end_va++) = 0;
-  10074a:	c6 07 00             	movb   $0x0,(%edi)
-  10074d:	47                   	inc    %edi
+  10076e:	c6 07 00             	movb   $0x0,(%edi)
+  100771:	47                   	inc    %edi
 
 	// copy data
 	memcpy((uint8_t *) va, src, end_va - va);
 
 	// clear bss segment
 	while (end_va < memsz)
-  10074e:	3b 7c 24 0c          	cmp    0xc(%esp),%edi
-  100752:	72 f6                	jb     10074a <program_loader+0x6a>
+  100772:	3b 7c 24 0c          	cmp    0xc(%esp),%edi
+  100776:	72 f6                	jb     10076e <program_loader+0x6a>
 		loader_panic();
 
 	// load each program segment (ignores ph flags)
 	ph = (struct Proghdr*) ((const uint8_t *) elf_header + elf_header->e_phoff);
 	eph = ph + elf_header->e_phnum;
 	for (; ph < eph; ph++)
-  100754:	83 c3 20             	add    $0x20,%ebx
-  100757:	39 eb                	cmp    %ebp,%ebx
-  100759:	72 bd                	jb     100718 <program_loader+0x38>
+  100778:	83 c3 20             	add    $0x20,%ebx
+  10077b:	39 eb                	cmp    %ebp,%ebx
+  10077d:	72 bd                	jb     10073c <program_loader+0x38>
 			copyseg((void *) ph->p_va,
 				(const uint8_t *) elf_header + ph->p_offset,
 				ph->p_filesz, ph->p_memsz);
 
 	// store the entry point from the ELF header
 	*entry_point = elf_header->e_entry;
-  10075b:	8b 56 18             	mov    0x18(%esi),%edx
-  10075e:	8b 44 24 34          	mov    0x34(%esp),%eax
-  100762:	89 10                	mov    %edx,(%eax)
+  10077f:	8b 56 18             	mov    0x18(%esi),%edx
+  100782:	8b 44 24 34          	mov    0x34(%esp),%eax
+  100786:	89 10                	mov    %edx,(%eax)
 }
-  100764:	83 c4 1c             	add    $0x1c,%esp
-  100767:	5b                   	pop    %ebx
-  100768:	5e                   	pop    %esi
-  100769:	5f                   	pop    %edi
-  10076a:	5d                   	pop    %ebp
-  10076b:	c3                   	ret    
+  100788:	83 c4 1c             	add    $0x1c,%esp
+  10078b:	5b                   	pop    %ebx
+  10078c:	5e                   	pop    %esi
+  10078d:	5f                   	pop    %edi
+  10078e:	5d                   	pop    %ebp
+  10078f:	c3                   	ret    
 
-0010076c <memcpy>:
+00100790 <memcpy>:
  *
  *   We must provide our own implementations of these basic functions. */
 
 void *
 memcpy(void *dst, const void *src, size_t n)
 {
-  10076c:	56                   	push   %esi
-  10076d:	31 d2                	xor    %edx,%edx
-  10076f:	53                   	push   %ebx
-  100770:	8b 44 24 0c          	mov    0xc(%esp),%eax
-  100774:	8b 5c 24 10          	mov    0x10(%esp),%ebx
-  100778:	8b 74 24 14          	mov    0x14(%esp),%esi
+  100790:	56                   	push   %esi
+  100791:	31 d2                	xor    %edx,%edx
+  100793:	53                   	push   %ebx
+  100794:	8b 44 24 0c          	mov    0xc(%esp),%eax
+  100798:	8b 5c 24 10          	mov    0x10(%esp),%ebx
+  10079c:	8b 74 24 14          	mov    0x14(%esp),%esi
 	const char *s = (const char *) src;
 	char *d = (char *) dst;
 	while (n-- > 0)
-  10077c:	eb 08                	jmp    100786 <memcpy+0x1a>
+  1007a0:	eb 08                	jmp    1007aa <memcpy+0x1a>
 		*d++ = *s++;
-  10077e:	8a 0c 13             	mov    (%ebx,%edx,1),%cl
-  100781:	4e                   	dec    %esi
-  100782:	88 0c 10             	mov    %cl,(%eax,%edx,1)
-  100785:	42                   	inc    %edx
+  1007a2:	8a 0c 13             	mov    (%ebx,%edx,1),%cl
+  1007a5:	4e                   	dec    %esi
+  1007a6:	88 0c 10             	mov    %cl,(%eax,%edx,1)
+  1007a9:	42                   	inc    %edx
 void *
 memcpy(void *dst, const void *src, size_t n)
 {
 	const char *s = (const char *) src;
 	char *d = (char *) dst;
 	while (n-- > 0)
-  100786:	85 f6                	test   %esi,%esi
-  100788:	75 f4                	jne    10077e <memcpy+0x12>
+  1007aa:	85 f6                	test   %esi,%esi
+  1007ac:	75 f4                	jne    1007a2 <memcpy+0x12>
 		*d++ = *s++;
 	return dst;
 }
-  10078a:	5b                   	pop    %ebx
-  10078b:	5e                   	pop    %esi
-  10078c:	c3                   	ret    
+  1007ae:	5b                   	pop    %ebx
+  1007af:	5e                   	pop    %esi
+  1007b0:	c3                   	ret    
 
-0010078d <memmove>:
+001007b1 <memmove>:
 
 void *
 memmove(void *dst, const void *src, size_t n)
 {
-  10078d:	57                   	push   %edi
-  10078e:	56                   	push   %esi
-  10078f:	53                   	push   %ebx
-  100790:	8b 44 24 10          	mov    0x10(%esp),%eax
-  100794:	8b 7c 24 14          	mov    0x14(%esp),%edi
-  100798:	8b 54 24 18          	mov    0x18(%esp),%edx
+  1007b1:	57                   	push   %edi
+  1007b2:	56                   	push   %esi
+  1007b3:	53                   	push   %ebx
+  1007b4:	8b 44 24 10          	mov    0x10(%esp),%eax
+  1007b8:	8b 7c 24 14          	mov    0x14(%esp),%edi
+  1007bc:	8b 54 24 18          	mov    0x18(%esp),%edx
 	const char *s = (const char *) src;
 	char *d = (char *) dst;
 	if (s < d && s + n > d) {
-  10079c:	39 c7                	cmp    %eax,%edi
-  10079e:	73 26                	jae    1007c6 <memmove+0x39>
-  1007a0:	8d 34 17             	lea    (%edi,%edx,1),%esi
-  1007a3:	39 c6                	cmp    %eax,%esi
-  1007a5:	76 1f                	jbe    1007c6 <memmove+0x39>
+  1007c0:	39 c7                	cmp    %eax,%edi
+  1007c2:	73 26                	jae    1007ea <memmove+0x39>
+  1007c4:	8d 34 17             	lea    (%edi,%edx,1),%esi
+  1007c7:	39 c6                	cmp    %eax,%esi
+  1007c9:	76 1f                	jbe    1007ea <memmove+0x39>
 		s += n, d += n;
-  1007a7:	8d 3c 10             	lea    (%eax,%edx,1),%edi
-  1007aa:	31 c9                	xor    %ecx,%ecx
+  1007cb:	8d 3c 10             	lea    (%eax,%edx,1),%edi
+  1007ce:	31 c9                	xor    %ecx,%ecx
 		while (n-- > 0)
-  1007ac:	eb 07                	jmp    1007b5 <memmove+0x28>
+  1007d0:	eb 07                	jmp    1007d9 <memmove+0x28>
 			*--d = *--s;
-  1007ae:	8a 1c 0e             	mov    (%esi,%ecx,1),%bl
-  1007b1:	4a                   	dec    %edx
-  1007b2:	88 1c 0f             	mov    %bl,(%edi,%ecx,1)
-  1007b5:	49                   	dec    %ecx
+  1007d2:	8a 1c 0e             	mov    (%esi,%ecx,1),%bl
+  1007d5:	4a                   	dec    %edx
+  1007d6:	88 1c 0f             	mov    %bl,(%edi,%ecx,1)
+  1007d9:	49                   	dec    %ecx
 {
 	const char *s = (const char *) src;
 	char *d = (char *) dst;
 	if (s < d && s + n > d) {
 		s += n, d += n;
 		while (n-- > 0)
-  1007b6:	85 d2                	test   %edx,%edx
-  1007b8:	75 f4                	jne    1007ae <memmove+0x21>
-  1007ba:	eb 10                	jmp    1007cc <memmove+0x3f>
+  1007da:	85 d2                	test   %edx,%edx
+  1007dc:	75 f4                	jne    1007d2 <memmove+0x21>
+  1007de:	eb 10                	jmp    1007f0 <memmove+0x3f>
 			*--d = *--s;
 	} else
 		while (n-- > 0)
 			*d++ = *s++;
-  1007bc:	8a 1c 0f             	mov    (%edi,%ecx,1),%bl
-  1007bf:	4a                   	dec    %edx
-  1007c0:	88 1c 08             	mov    %bl,(%eax,%ecx,1)
-  1007c3:	41                   	inc    %ecx
-  1007c4:	eb 02                	jmp    1007c8 <memmove+0x3b>
-  1007c6:	31 c9                	xor    %ecx,%ecx
+  1007e0:	8a 1c 0f             	mov    (%edi,%ecx,1),%bl
+  1007e3:	4a                   	dec    %edx
+  1007e4:	88 1c 08             	mov    %bl,(%eax,%ecx,1)
+  1007e7:	41                   	inc    %ecx
+  1007e8:	eb 02                	jmp    1007ec <memmove+0x3b>
+  1007ea:	31 c9                	xor    %ecx,%ecx
 	if (s < d && s + n > d) {
 		s += n, d += n;
 		while (n-- > 0)
 			*--d = *--s;
 	} else
 		while (n-- > 0)
-  1007c8:	85 d2                	test   %edx,%edx
-  1007ca:	75 f0                	jne    1007bc <memmove+0x2f>
+  1007ec:	85 d2                	test   %edx,%edx
+  1007ee:	75 f0                	jne    1007e0 <memmove+0x2f>
 			*d++ = *s++;
 	return dst;
 }
-  1007cc:	5b                   	pop    %ebx
-  1007cd:	5e                   	pop    %esi
-  1007ce:	5f                   	pop    %edi
-  1007cf:	c3                   	ret    
+  1007f0:	5b                   	pop    %ebx
+  1007f1:	5e                   	pop    %esi
+  1007f2:	5f                   	pop    %edi
+  1007f3:	c3                   	ret    
 
-001007d0 <memset>:
+001007f4 <memset>:
 
 void *
 memset(void *v, int c, size_t n)
 {
-  1007d0:	53                   	push   %ebx
-  1007d1:	8b 44 24 08          	mov    0x8(%esp),%eax
-  1007d5:	8b 5c 24 0c          	mov    0xc(%esp),%ebx
-  1007d9:	8b 4c 24 10          	mov    0x10(%esp),%ecx
+  1007f4:	53                   	push   %ebx
+  1007f5:	8b 44 24 08          	mov    0x8(%esp),%eax
+  1007f9:	8b 5c 24 0c          	mov    0xc(%esp),%ebx
+  1007fd:	8b 4c 24 10          	mov    0x10(%esp),%ecx
 	char *p = (char *) v;
-  1007dd:	89 c2                	mov    %eax,%edx
+  100801:	89 c2                	mov    %eax,%edx
 	while (n-- > 0)
-  1007df:	eb 04                	jmp    1007e5 <memset+0x15>
+  100803:	eb 04                	jmp    100809 <memset+0x15>
 		*p++ = c;
-  1007e1:	88 1a                	mov    %bl,(%edx)
-  1007e3:	49                   	dec    %ecx
-  1007e4:	42                   	inc    %edx
+  100805:	88 1a                	mov    %bl,(%edx)
+  100807:	49                   	dec    %ecx
+  100808:	42                   	inc    %edx
 
 void *
 memset(void *v, int c, size_t n)
 {
 	char *p = (char *) v;
 	while (n-- > 0)
-  1007e5:	85 c9                	test   %ecx,%ecx
-  1007e7:	75 f8                	jne    1007e1 <memset+0x11>
+  100809:	85 c9                	test   %ecx,%ecx
+  10080b:	75 f8                	jne    100805 <memset+0x11>
 		*p++ = c;
 	return v;
 }
-  1007e9:	5b                   	pop    %ebx
-  1007ea:	c3                   	ret    
+  10080d:	5b                   	pop    %ebx
+  10080e:	c3                   	ret    
 
-001007eb <strlen>:
-
-size_t
-strlen(const char *s)
-{
-  1007eb:	8b 54 24 04          	mov    0x4(%esp),%edx
-  1007ef:	31 c0                	xor    %eax,%eax
-	size_t n;
-	for (n = 0; *s != '\0'; ++s)
-  1007f1:	eb 01                	jmp    1007f4 <strlen+0x9>
-		++n;
-  1007f3:	40                   	inc    %eax
+0010080f <strlen>:
 
 size_t
 strlen(const char *s)
 {
+  10080f:	8b 54 24 04          	mov    0x4(%esp),%edx
+  100813:	31 c0                	xor    %eax,%eax
 	size_t n;
 	for (n = 0; *s != '\0'; ++s)
-  1007f4:	80 3c 02 00          	cmpb   $0x0,(%edx,%eax,1)
-  1007f8:	75 f9                	jne    1007f3 <strlen+0x8>
+  100815:	eb 01                	jmp    100818 <strlen+0x9>
+		++n;
+  100817:	40                   	inc    %eax
+
+size_t
+strlen(const char *s)
+{
+	size_t n;
+	for (n = 0; *s != '\0'; ++s)
+  100818:	80 3c 02 00          	cmpb   $0x0,(%edx,%eax,1)
+  10081c:	75 f9                	jne    100817 <strlen+0x8>
 		++n;
 	return n;
 }
-  1007fa:	c3                   	ret    
+  10081e:	c3                   	ret    
 
-001007fb <strnlen>:
+0010081f <strnlen>:
 
 size_t
 strnlen(const char *s, size_t maxlen)
 {
-  1007fb:	8b 4c 24 04          	mov    0x4(%esp),%ecx
-  1007ff:	31 c0                	xor    %eax,%eax
-  100801:	8b 54 24 08          	mov    0x8(%esp),%edx
+  10081f:	8b 4c 24 04          	mov    0x4(%esp),%ecx
+  100823:	31 c0                	xor    %eax,%eax
+  100825:	8b 54 24 08          	mov    0x8(%esp),%edx
 	size_t n;
 	for (n = 0; n != maxlen && *s != '\0'; ++s)
-  100805:	eb 01                	jmp    100808 <strnlen+0xd>
+  100829:	eb 01                	jmp    10082c <strnlen+0xd>
 		++n;
-  100807:	40                   	inc    %eax
+  10082b:	40                   	inc    %eax
 
 size_t
 strnlen(const char *s, size_t maxlen)
 {
 	size_t n;
 	for (n = 0; n != maxlen && *s != '\0'; ++s)
-  100808:	39 d0                	cmp    %edx,%eax
-  10080a:	74 06                	je     100812 <strnlen+0x17>
-  10080c:	80 3c 01 00          	cmpb   $0x0,(%ecx,%eax,1)
-  100810:	75 f5                	jne    100807 <strnlen+0xc>
+  10082c:	39 d0                	cmp    %edx,%eax
+  10082e:	74 06                	je     100836 <strnlen+0x17>
+  100830:	80 3c 01 00          	cmpb   $0x0,(%ecx,%eax,1)
+  100834:	75 f5                	jne    10082b <strnlen+0xc>
 		++n;
 	return n;
 }
-  100812:	c3                   	ret    
+  100836:	c3                   	ret    
 
-00100813 <console_putc>:
+00100837 <console_putc>:
  *
  *   Print a message onto the console, starting at the given cursor position. */
 
 static uint16_t *
 console_putc(uint16_t *cursor, unsigned char c, int color)
 {
-  100813:	56                   	push   %esi
+  100837:	56                   	push   %esi
 	if (cursor >= CONSOLE_END)
-  100814:	3d 9f 8f 0b 00       	cmp    $0xb8f9f,%eax
+  100838:	3d 9f 8f 0b 00       	cmp    $0xb8f9f,%eax
  *
  *   Print a message onto the console, starting at the given cursor position. */
 
 static uint16_t *
 console_putc(uint16_t *cursor, unsigned char c, int color)
 {
-  100819:	53                   	push   %ebx
-  10081a:	89 c3                	mov    %eax,%ebx
+  10083d:	53                   	push   %ebx
+  10083e:	89 c3                	mov    %eax,%ebx
 	if (cursor >= CONSOLE_END)
-  10081c:	76 05                	jbe    100823 <console_putc+0x10>
-  10081e:	bb 00 80 0b 00       	mov    $0xb8000,%ebx
+  100840:	76 05                	jbe    100847 <console_putc+0x10>
+  100842:	bb 00 80 0b 00       	mov    $0xb8000,%ebx
 		cursor = CONSOLE_BEGIN;
 	if (c == '\n') {
-  100823:	80 fa 0a             	cmp    $0xa,%dl
-  100826:	75 2c                	jne    100854 <console_putc+0x41>
+  100847:	80 fa 0a             	cmp    $0xa,%dl
+  10084a:	75 2c                	jne    100878 <console_putc+0x41>
 		int pos = (cursor - CONSOLE_BEGIN) % 80;
-  100828:	8d 83 00 80 f4 ff    	lea    -0xb8000(%ebx),%eax
-  10082e:	be 50 00 00 00       	mov    $0x50,%esi
-  100833:	d1 f8                	sar    %eax
+  10084c:	8d 83 00 80 f4 ff    	lea    -0xb8000(%ebx),%eax
+  100852:	be 50 00 00 00       	mov    $0x50,%esi
+  100857:	d1 f8                	sar    %eax
 		for (; pos != 80; pos++)
 			*cursor++ = ' ' | color;
-  100835:	83 c9 20             	or     $0x20,%ecx
+  100859:	83 c9 20             	or     $0x20,%ecx
 console_putc(uint16_t *cursor, unsigned char c, int color)
 {
 	if (cursor >= CONSOLE_END)
 		cursor = CONSOLE_BEGIN;
 	if (c == '\n') {
 		int pos = (cursor - CONSOLE_BEGIN) % 80;
-  100838:	99                   	cltd   
-  100839:	f7 fe                	idiv   %esi
-  10083b:	89 de                	mov    %ebx,%esi
-  10083d:	89 d0                	mov    %edx,%eax
+  10085c:	99                   	cltd   
+  10085d:	f7 fe                	idiv   %esi
+  10085f:	89 de                	mov    %ebx,%esi
+  100861:	89 d0                	mov    %edx,%eax
 		for (; pos != 80; pos++)
-  10083f:	eb 07                	jmp    100848 <console_putc+0x35>
+  100863:	eb 07                	jmp    10086c <console_putc+0x35>
 			*cursor++ = ' ' | color;
-  100841:	66 89 0e             	mov    %cx,(%esi)
+  100865:	66 89 0e             	mov    %cx,(%esi)
 {
 	if (cursor >= CONSOLE_END)
 		cursor = CONSOLE_BEGIN;
 	if (c == '\n') {
 		int pos = (cursor - CONSOLE_BEGIN) % 80;
 		for (; pos != 80; pos++)
-  100844:	40                   	inc    %eax
+  100868:	40                   	inc    %eax
 			*cursor++ = ' ' | color;
-  100845:	83 c6 02             	add    $0x2,%esi
+  100869:	83 c6 02             	add    $0x2,%esi
 {
 	if (cursor >= CONSOLE_END)
 		cursor = CONSOLE_BEGIN;
 	if (c == '\n') {
 		int pos = (cursor - CONSOLE_BEGIN) % 80;
 		for (; pos != 80; pos++)
-  100848:	83 f8 50             	cmp    $0x50,%eax
-  10084b:	75 f4                	jne    100841 <console_putc+0x2e>
-  10084d:	29 d0                	sub    %edx,%eax
-  10084f:	8d 04 43             	lea    (%ebx,%eax,2),%eax
-  100852:	eb 0b                	jmp    10085f <console_putc+0x4c>
+  10086c:	83 f8 50             	cmp    $0x50,%eax
+  10086f:	75 f4                	jne    100865 <console_putc+0x2e>
+  100871:	29 d0                	sub    %edx,%eax
+  100873:	8d 04 43             	lea    (%ebx,%eax,2),%eax
+  100876:	eb 0b                	jmp    100883 <console_putc+0x4c>
 			*cursor++ = ' ' | color;
 	} else
 		*cursor++ = c | color;
-  100854:	0f b6 d2             	movzbl %dl,%edx
-  100857:	09 ca                	or     %ecx,%edx
-  100859:	66 89 13             	mov    %dx,(%ebx)
-  10085c:	8d 43 02             	lea    0x2(%ebx),%eax
+  100878:	0f b6 d2             	movzbl %dl,%edx
+  10087b:	09 ca                	or     %ecx,%edx
+  10087d:	66 89 13             	mov    %dx,(%ebx)
+  100880:	8d 43 02             	lea    0x2(%ebx),%eax
 	return cursor;
 }
-  10085f:	5b                   	pop    %ebx
-  100860:	5e                   	pop    %esi
-  100861:	c3                   	ret    
+  100883:	5b                   	pop    %ebx
+  100884:	5e                   	pop    %esi
+  100885:	c3                   	ret    
 
-00100862 <fill_numbuf>:
+00100886 <fill_numbuf>:
 static const char lower_digits[] = "0123456789abcdef";
 
 static char *
 fill_numbuf(char *numbuf_end, uint32_t val, int base, const char *digits,
 	    int precision)
 {
-  100862:	56                   	push   %esi
-  100863:	53                   	push   %ebx
-  100864:	8b 74 24 0c          	mov    0xc(%esp),%esi
+  100886:	56                   	push   %esi
+  100887:	53                   	push   %ebx
+  100888:	8b 74 24 0c          	mov    0xc(%esp),%esi
 	*--numbuf_end = '\0';
-  100868:	8d 58 ff             	lea    -0x1(%eax),%ebx
-  10086b:	c6 40 ff 00          	movb   $0x0,-0x1(%eax)
+  10088c:	8d 58 ff             	lea    -0x1(%eax),%ebx
+  10088f:	c6 40 ff 00          	movb   $0x0,-0x1(%eax)
 	if (precision != 0 || val != 0)
-  10086f:	83 7c 24 10 00       	cmpl   $0x0,0x10(%esp)
-  100874:	75 04                	jne    10087a <fill_numbuf+0x18>
-  100876:	85 d2                	test   %edx,%edx
-  100878:	74 10                	je     10088a <fill_numbuf+0x28>
+  100893:	83 7c 24 10 00       	cmpl   $0x0,0x10(%esp)
+  100898:	75 04                	jne    10089e <fill_numbuf+0x18>
+  10089a:	85 d2                	test   %edx,%edx
+  10089c:	74 10                	je     1008ae <fill_numbuf+0x28>
 		do {
 			*--numbuf_end = digits[val % base];
-  10087a:	89 d0                	mov    %edx,%eax
-  10087c:	31 d2                	xor    %edx,%edx
-  10087e:	f7 f1                	div    %ecx
-  100880:	4b                   	dec    %ebx
-  100881:	8a 14 16             	mov    (%esi,%edx,1),%dl
-  100884:	88 13                	mov    %dl,(%ebx)
+  10089e:	89 d0                	mov    %edx,%eax
+  1008a0:	31 d2                	xor    %edx,%edx
+  1008a2:	f7 f1                	div    %ecx
+  1008a4:	4b                   	dec    %ebx
+  1008a5:	8a 14 16             	mov    (%esi,%edx,1),%dl
+  1008a8:	88 13                	mov    %dl,(%ebx)
 			val /= base;
-  100886:	89 c2                	mov    %eax,%edx
-  100888:	eb ec                	jmp    100876 <fill_numbuf+0x14>
+  1008aa:	89 c2                	mov    %eax,%edx
+  1008ac:	eb ec                	jmp    10089a <fill_numbuf+0x14>
 		} while (val != 0);
 	return numbuf_end;
 }
-  10088a:	89 d8                	mov    %ebx,%eax
-  10088c:	5b                   	pop    %ebx
-  10088d:	5e                   	pop    %esi
-  10088e:	c3                   	ret    
+  1008ae:	89 d8                	mov    %ebx,%eax
+  1008b0:	5b                   	pop    %ebx
+  1008b1:	5e                   	pop    %esi
+  1008b2:	c3                   	ret    
 
-0010088f <console_vprintf>:
+001008b3 <console_vprintf>:
 #define FLAG_PLUSPOSITIVE	(1<<4)
 static const char flag_chars[] = "#0- +";
 
 uint16_t *
 console_vprintf(uint16_t *cursor, int color, const char *format, va_list val)
 {
-  10088f:	55                   	push   %ebp
-  100890:	57                   	push   %edi
-  100891:	56                   	push   %esi
-  100892:	53                   	push   %ebx
-  100893:	83 ec 38             	sub    $0x38,%esp
-  100896:	8b 74 24 4c          	mov    0x4c(%esp),%esi
-  10089a:	8b 7c 24 54          	mov    0x54(%esp),%edi
-  10089e:	8b 5c 24 58          	mov    0x58(%esp),%ebx
+  1008b3:	55                   	push   %ebp
+  1008b4:	57                   	push   %edi
+  1008b5:	56                   	push   %esi
+  1008b6:	53                   	push   %ebx
+  1008b7:	83 ec 38             	sub    $0x38,%esp
+  1008ba:	8b 74 24 4c          	mov    0x4c(%esp),%esi
+  1008be:	8b 7c 24 54          	mov    0x54(%esp),%edi
+  1008c2:	8b 5c 24 58          	mov    0x58(%esp),%ebx
 	int flags, width, zeros, precision, negative, numeric, len;
 #define NUMBUFSIZ 20
 	char numbuf[NUMBUFSIZ];
 	char *data;
 
 	for (; *format; ++format) {
-  1008a2:	e9 60 03 00 00       	jmp    100c07 <console_vprintf+0x378>
+  1008c6:	e9 60 03 00 00       	jmp    100c2b <console_vprintf+0x378>
 		if (*format != '%') {
-  1008a7:	80 fa 25             	cmp    $0x25,%dl
-  1008aa:	74 13                	je     1008bf <console_vprintf+0x30>
+  1008cb:	80 fa 25             	cmp    $0x25,%dl
+  1008ce:	74 13                	je     1008e3 <console_vprintf+0x30>
 			cursor = console_putc(cursor, *format, color);
-  1008ac:	8b 4c 24 50          	mov    0x50(%esp),%ecx
-  1008b0:	0f b6 d2             	movzbl %dl,%edx
-  1008b3:	89 f0                	mov    %esi,%eax
-  1008b5:	e8 59 ff ff ff       	call   100813 <console_putc>
-  1008ba:	e9 45 03 00 00       	jmp    100c04 <console_vprintf+0x375>
+  1008d0:	8b 4c 24 50          	mov    0x50(%esp),%ecx
+  1008d4:	0f b6 d2             	movzbl %dl,%edx
+  1008d7:	89 f0                	mov    %esi,%eax
+  1008d9:	e8 59 ff ff ff       	call   100837 <console_putc>
+  1008de:	e9 45 03 00 00       	jmp    100c28 <console_vprintf+0x375>
 			continue;
 		}
 
 		// process flags
 		flags = 0;
 		for (++format; *format; ++format) {
-  1008bf:	47                   	inc    %edi
-  1008c0:	c7 44 24 14 00 00 00 	movl   $0x0,0x14(%esp)
-  1008c7:	00 
-  1008c8:	eb 12                	jmp    1008dc <console_vprintf+0x4d>
+  1008e3:	47                   	inc    %edi
+  1008e4:	c7 44 24 14 00 00 00 	movl   $0x0,0x14(%esp)
+  1008eb:	00 
+  1008ec:	eb 12                	jmp    100900 <console_vprintf+0x4d>
 			const char *flagc = flag_chars;
 			while (*flagc != '\0' && *flagc != *format)
 				++flagc;
-  1008ca:	41                   	inc    %ecx
+  1008ee:	41                   	inc    %ecx
 
 		// process flags
 		flags = 0;
 		for (++format; *format; ++format) {
 			const char *flagc = flag_chars;
 			while (*flagc != '\0' && *flagc != *format)
-  1008cb:	8a 11                	mov    (%ecx),%dl
-  1008cd:	84 d2                	test   %dl,%dl
-  1008cf:	74 1a                	je     1008eb <console_vprintf+0x5c>
-  1008d1:	89 e8                	mov    %ebp,%eax
-  1008d3:	38 c2                	cmp    %al,%dl
-  1008d5:	75 f3                	jne    1008ca <console_vprintf+0x3b>
-  1008d7:	e9 3f 03 00 00       	jmp    100c1b <console_vprintf+0x38c>
+  1008ef:	8a 11                	mov    (%ecx),%dl
+  1008f1:	84 d2                	test   %dl,%dl
+  1008f3:	74 1a                	je     10090f <console_vprintf+0x5c>
+  1008f5:	89 e8                	mov    %ebp,%eax
+  1008f7:	38 c2                	cmp    %al,%dl
+  1008f9:	75 f3                	jne    1008ee <console_vprintf+0x3b>
+  1008fb:	e9 3f 03 00 00       	jmp    100c3f <console_vprintf+0x38c>
 			continue;
 		}
 
 		// process flags
 		flags = 0;
 		for (++format; *format; ++format) {
-  1008dc:	8a 17                	mov    (%edi),%dl
-  1008de:	84 d2                	test   %dl,%dl
-  1008e0:	74 0b                	je     1008ed <console_vprintf+0x5e>
-  1008e2:	b9 6c 0e 10 00       	mov    $0x100e6c,%ecx
-  1008e7:	89 d5                	mov    %edx,%ebp
-  1008e9:	eb e0                	jmp    1008cb <console_vprintf+0x3c>
-  1008eb:	89 ea                	mov    %ebp,%edx
+  100900:	8a 17                	mov    (%edi),%dl
+  100902:	84 d2                	test   %dl,%dl
+  100904:	74 0b                	je     100911 <console_vprintf+0x5e>
+  100906:	b9 90 0e 10 00       	mov    $0x100e90,%ecx
+  10090b:	89 d5                	mov    %edx,%ebp
+  10090d:	eb e0                	jmp    1008ef <console_vprintf+0x3c>
+  10090f:	89 ea                	mov    %ebp,%edx
 			flags |= (1 << (flagc - flag_chars));
 		}
 
 		// process width
 		width = -1;
 		if (*format >= '1' && *format <= '9') {
-  1008ed:	8d 42 cf             	lea    -0x31(%edx),%eax
-  1008f0:	3c 08                	cmp    $0x8,%al
-  1008f2:	c7 44 24 0c 00 00 00 	movl   $0x0,0xc(%esp)
-  1008f9:	00 
-  1008fa:	76 13                	jbe    10090f <console_vprintf+0x80>
-  1008fc:	eb 1d                	jmp    10091b <console_vprintf+0x8c>
+  100911:	8d 42 cf             	lea    -0x31(%edx),%eax
+  100914:	3c 08                	cmp    $0x8,%al
+  100916:	c7 44 24 0c 00 00 00 	movl   $0x0,0xc(%esp)
+  10091d:	00 
+  10091e:	76 13                	jbe    100933 <console_vprintf+0x80>
+  100920:	eb 1d                	jmp    10093f <console_vprintf+0x8c>
 			for (width = 0; *format >= '0' && *format <= '9'; )
 				width = 10 * width + *format++ - '0';
-  1008fe:	6b 54 24 0c 0a       	imul   $0xa,0xc(%esp),%edx
-  100903:	0f be c0             	movsbl %al,%eax
-  100906:	47                   	inc    %edi
-  100907:	8d 44 02 d0          	lea    -0x30(%edx,%eax,1),%eax
-  10090b:	89 44 24 0c          	mov    %eax,0xc(%esp)
+  100922:	6b 54 24 0c 0a       	imul   $0xa,0xc(%esp),%edx
+  100927:	0f be c0             	movsbl %al,%eax
+  10092a:	47                   	inc    %edi
+  10092b:	8d 44 02 d0          	lea    -0x30(%edx,%eax,1),%eax
+  10092f:	89 44 24 0c          	mov    %eax,0xc(%esp)
 		}
 
 		// process width
 		width = -1;
 		if (*format >= '1' && *format <= '9') {
 			for (width = 0; *format >= '0' && *format <= '9'; )
-  10090f:	8a 07                	mov    (%edi),%al
-  100911:	8d 50 d0             	lea    -0x30(%eax),%edx
-  100914:	80 fa 09             	cmp    $0x9,%dl
-  100917:	76 e5                	jbe    1008fe <console_vprintf+0x6f>
-  100919:	eb 18                	jmp    100933 <console_vprintf+0xa4>
+  100933:	8a 07                	mov    (%edi),%al
+  100935:	8d 50 d0             	lea    -0x30(%eax),%edx
+  100938:	80 fa 09             	cmp    $0x9,%dl
+  10093b:	76 e5                	jbe    100922 <console_vprintf+0x6f>
+  10093d:	eb 18                	jmp    100957 <console_vprintf+0xa4>
 				width = 10 * width + *format++ - '0';
 		} else if (*format == '*') {
-  10091b:	80 fa 2a             	cmp    $0x2a,%dl
-  10091e:	c7 44 24 0c ff ff ff 	movl   $0xffffffff,0xc(%esp)
-  100925:	ff 
-  100926:	75 0b                	jne    100933 <console_vprintf+0xa4>
+  10093f:	80 fa 2a             	cmp    $0x2a,%dl
+  100942:	c7 44 24 0c ff ff ff 	movl   $0xffffffff,0xc(%esp)
+  100949:	ff 
+  10094a:	75 0b                	jne    100957 <console_vprintf+0xa4>
 			width = va_arg(val, int);
-  100928:	83 c3 04             	add    $0x4,%ebx
+  10094c:	83 c3 04             	add    $0x4,%ebx
 			++format;
-  10092b:	47                   	inc    %edi
+  10094f:	47                   	inc    %edi
 		width = -1;
 		if (*format >= '1' && *format <= '9') {
 			for (width = 0; *format >= '0' && *format <= '9'; )
 				width = 10 * width + *format++ - '0';
 		} else if (*format == '*') {
 			width = va_arg(val, int);
-  10092c:	8b 53 fc             	mov    -0x4(%ebx),%edx
-  10092f:	89 54 24 0c          	mov    %edx,0xc(%esp)
+  100950:	8b 53 fc             	mov    -0x4(%ebx),%edx
+  100953:	89 54 24 0c          	mov    %edx,0xc(%esp)
 			++format;
 		}
 
 		// process precision
 		precision = -1;
 		if (*format == '.') {
-  100933:	83 cd ff             	or     $0xffffffff,%ebp
-  100936:	80 3f 2e             	cmpb   $0x2e,(%edi)
-  100939:	75 37                	jne    100972 <console_vprintf+0xe3>
+  100957:	83 cd ff             	or     $0xffffffff,%ebp
+  10095a:	80 3f 2e             	cmpb   $0x2e,(%edi)
+  10095d:	75 37                	jne    100996 <console_vprintf+0xe3>
 			++format;
-  10093b:	47                   	inc    %edi
+  10095f:	47                   	inc    %edi
 			if (*format >= '0' && *format <= '9') {
-  10093c:	31 ed                	xor    %ebp,%ebp
-  10093e:	8a 07                	mov    (%edi),%al
-  100940:	8d 50 d0             	lea    -0x30(%eax),%edx
-  100943:	80 fa 09             	cmp    $0x9,%dl
-  100946:	76 0d                	jbe    100955 <console_vprintf+0xc6>
-  100948:	eb 17                	jmp    100961 <console_vprintf+0xd2>
+  100960:	31 ed                	xor    %ebp,%ebp
+  100962:	8a 07                	mov    (%edi),%al
+  100964:	8d 50 d0             	lea    -0x30(%eax),%edx
+  100967:	80 fa 09             	cmp    $0x9,%dl
+  10096a:	76 0d                	jbe    100979 <console_vprintf+0xc6>
+  10096c:	eb 17                	jmp    100985 <console_vprintf+0xd2>
 				for (precision = 0; *format >= '0' && *format <= '9'; )
 					precision = 10 * precision + *format++ - '0';
-  10094a:	6b ed 0a             	imul   $0xa,%ebp,%ebp
-  10094d:	0f be c0             	movsbl %al,%eax
-  100950:	47                   	inc    %edi
-  100951:	8d 6c 05 d0          	lea    -0x30(%ebp,%eax,1),%ebp
+  10096e:	6b ed 0a             	imul   $0xa,%ebp,%ebp
+  100971:	0f be c0             	movsbl %al,%eax
+  100974:	47                   	inc    %edi
+  100975:	8d 6c 05 d0          	lea    -0x30(%ebp,%eax,1),%ebp
 		// process precision
 		precision = -1;
 		if (*format == '.') {
 			++format;
 			if (*format >= '0' && *format <= '9') {
 				for (precision = 0; *format >= '0' && *format <= '9'; )
-  100955:	8a 07                	mov    (%edi),%al
-  100957:	8d 50 d0             	lea    -0x30(%eax),%edx
-  10095a:	80 fa 09             	cmp    $0x9,%dl
-  10095d:	76 eb                	jbe    10094a <console_vprintf+0xbb>
-  10095f:	eb 11                	jmp    100972 <console_vprintf+0xe3>
+  100979:	8a 07                	mov    (%edi),%al
+  10097b:	8d 50 d0             	lea    -0x30(%eax),%edx
+  10097e:	80 fa 09             	cmp    $0x9,%dl
+  100981:	76 eb                	jbe    10096e <console_vprintf+0xbb>
+  100983:	eb 11                	jmp    100996 <console_vprintf+0xe3>
 					precision = 10 * precision + *format++ - '0';
 			} else if (*format == '*') {
-  100961:	3c 2a                	cmp    $0x2a,%al
-  100963:	75 0b                	jne    100970 <console_vprintf+0xe1>
+  100985:	3c 2a                	cmp    $0x2a,%al
+  100987:	75 0b                	jne    100994 <console_vprintf+0xe1>
 				precision = va_arg(val, int);
-  100965:	83 c3 04             	add    $0x4,%ebx
+  100989:	83 c3 04             	add    $0x4,%ebx
 				++format;
-  100968:	47                   	inc    %edi
+  10098c:	47                   	inc    %edi
 			++format;
 			if (*format >= '0' && *format <= '9') {
 				for (precision = 0; *format >= '0' && *format <= '9'; )
 					precision = 10 * precision + *format++ - '0';
 			} else if (*format == '*') {
 				precision = va_arg(val, int);
-  100969:	8b 6b fc             	mov    -0x4(%ebx),%ebp
+  10098d:	8b 6b fc             	mov    -0x4(%ebx),%ebp
 				++format;
 			}
 			if (precision < 0)
-  10096c:	85 ed                	test   %ebp,%ebp
-  10096e:	79 02                	jns    100972 <console_vprintf+0xe3>
-  100970:	31 ed                	xor    %ebp,%ebp
+  100990:	85 ed                	test   %ebp,%ebp
+  100992:	79 02                	jns    100996 <console_vprintf+0xe3>
+  100994:	31 ed                	xor    %ebp,%ebp
 		}
 
 		// process main conversion character
 		negative = 0;
 		numeric = 0;
 		switch (*format) {
-  100972:	8a 07                	mov    (%edi),%al
-  100974:	3c 64                	cmp    $0x64,%al
-  100976:	74 34                	je     1009ac <console_vprintf+0x11d>
-  100978:	7f 1d                	jg     100997 <console_vprintf+0x108>
-  10097a:	3c 58                	cmp    $0x58,%al
-  10097c:	0f 84 a2 00 00 00    	je     100a24 <console_vprintf+0x195>
-  100982:	3c 63                	cmp    $0x63,%al
-  100984:	0f 84 bf 00 00 00    	je     100a49 <console_vprintf+0x1ba>
-  10098a:	3c 43                	cmp    $0x43,%al
-  10098c:	0f 85 d0 00 00 00    	jne    100a62 <console_vprintf+0x1d3>
-  100992:	e9 a3 00 00 00       	jmp    100a3a <console_vprintf+0x1ab>
-  100997:	3c 75                	cmp    $0x75,%al
-  100999:	74 4d                	je     1009e8 <console_vprintf+0x159>
-  10099b:	3c 78                	cmp    $0x78,%al
-  10099d:	74 5c                	je     1009fb <console_vprintf+0x16c>
-  10099f:	3c 73                	cmp    $0x73,%al
-  1009a1:	0f 85 bb 00 00 00    	jne    100a62 <console_vprintf+0x1d3>
-  1009a7:	e9 86 00 00 00       	jmp    100a32 <console_vprintf+0x1a3>
+  100996:	8a 07                	mov    (%edi),%al
+  100998:	3c 64                	cmp    $0x64,%al
+  10099a:	74 34                	je     1009d0 <console_vprintf+0x11d>
+  10099c:	7f 1d                	jg     1009bb <console_vprintf+0x108>
+  10099e:	3c 58                	cmp    $0x58,%al
+  1009a0:	0f 84 a2 00 00 00    	je     100a48 <console_vprintf+0x195>
+  1009a6:	3c 63                	cmp    $0x63,%al
+  1009a8:	0f 84 bf 00 00 00    	je     100a6d <console_vprintf+0x1ba>
+  1009ae:	3c 43                	cmp    $0x43,%al
+  1009b0:	0f 85 d0 00 00 00    	jne    100a86 <console_vprintf+0x1d3>
+  1009b6:	e9 a3 00 00 00       	jmp    100a5e <console_vprintf+0x1ab>
+  1009bb:	3c 75                	cmp    $0x75,%al
+  1009bd:	74 4d                	je     100a0c <console_vprintf+0x159>
+  1009bf:	3c 78                	cmp    $0x78,%al
+  1009c1:	74 5c                	je     100a1f <console_vprintf+0x16c>
+  1009c3:	3c 73                	cmp    $0x73,%al
+  1009c5:	0f 85 bb 00 00 00    	jne    100a86 <console_vprintf+0x1d3>
+  1009cb:	e9 86 00 00 00       	jmp    100a56 <console_vprintf+0x1a3>
 		case 'd': {
 			int x = va_arg(val, int);
-  1009ac:	83 c3 04             	add    $0x4,%ebx
-  1009af:	8b 53 fc             	mov    -0x4(%ebx),%edx
+  1009d0:	83 c3 04             	add    $0x4,%ebx
+  1009d3:	8b 53 fc             	mov    -0x4(%ebx),%edx
 			data = fill_numbuf(numbuf + NUMBUFSIZ, x > 0 ? x : -x, 10, upper_digits, precision);
-  1009b2:	89 d1                	mov    %edx,%ecx
-  1009b4:	c1 f9 1f             	sar    $0x1f,%ecx
-  1009b7:	89 0c 24             	mov    %ecx,(%esp)
-  1009ba:	31 ca                	xor    %ecx,%edx
-  1009bc:	55                   	push   %ebp
-  1009bd:	29 ca                	sub    %ecx,%edx
-  1009bf:	68 74 0e 10 00       	push   $0x100e74
-  1009c4:	b9 0a 00 00 00       	mov    $0xa,%ecx
-  1009c9:	8d 44 24 40          	lea    0x40(%esp),%eax
-  1009cd:	e8 90 fe ff ff       	call   100862 <fill_numbuf>
-  1009d2:	89 44 24 0c          	mov    %eax,0xc(%esp)
+  1009d6:	89 d1                	mov    %edx,%ecx
+  1009d8:	c1 f9 1f             	sar    $0x1f,%ecx
+  1009db:	89 0c 24             	mov    %ecx,(%esp)
+  1009de:	31 ca                	xor    %ecx,%edx
+  1009e0:	55                   	push   %ebp
+  1009e1:	29 ca                	sub    %ecx,%edx
+  1009e3:	68 98 0e 10 00       	push   $0x100e98
+  1009e8:	b9 0a 00 00 00       	mov    $0xa,%ecx
+  1009ed:	8d 44 24 40          	lea    0x40(%esp),%eax
+  1009f1:	e8 90 fe ff ff       	call   100886 <fill_numbuf>
+  1009f6:	89 44 24 0c          	mov    %eax,0xc(%esp)
 			if (x < 0)
-  1009d6:	58                   	pop    %eax
-  1009d7:	5a                   	pop    %edx
-  1009d8:	ba 01 00 00 00       	mov    $0x1,%edx
-  1009dd:	8b 04 24             	mov    (%esp),%eax
-  1009e0:	83 e0 01             	and    $0x1,%eax
-  1009e3:	e9 a5 00 00 00       	jmp    100a8d <console_vprintf+0x1fe>
+  1009fa:	58                   	pop    %eax
+  1009fb:	5a                   	pop    %edx
+  1009fc:	ba 01 00 00 00       	mov    $0x1,%edx
+  100a01:	8b 04 24             	mov    (%esp),%eax
+  100a04:	83 e0 01             	and    $0x1,%eax
+  100a07:	e9 a5 00 00 00       	jmp    100ab1 <console_vprintf+0x1fe>
 				negative = 1;
 			numeric = 1;
 			break;
 		}
 		case 'u': {
 			unsigned x = va_arg(val, unsigned);
-  1009e8:	83 c3 04             	add    $0x4,%ebx
+  100a0c:	83 c3 04             	add    $0x4,%ebx
 			data = fill_numbuf(numbuf + NUMBUFSIZ, x, 10, upper_digits, precision);
-  1009eb:	b9 0a 00 00 00       	mov    $0xa,%ecx
-  1009f0:	8b 53 fc             	mov    -0x4(%ebx),%edx
-  1009f3:	55                   	push   %ebp
-  1009f4:	68 74 0e 10 00       	push   $0x100e74
-  1009f9:	eb 11                	jmp    100a0c <console_vprintf+0x17d>
+  100a0f:	b9 0a 00 00 00       	mov    $0xa,%ecx
+  100a14:	8b 53 fc             	mov    -0x4(%ebx),%edx
+  100a17:	55                   	push   %ebp
+  100a18:	68 98 0e 10 00       	push   $0x100e98
+  100a1d:	eb 11                	jmp    100a30 <console_vprintf+0x17d>
 			numeric = 1;
 			break;
 		}
 		case 'x': {
 			unsigned x = va_arg(val, unsigned);
-  1009fb:	83 c3 04             	add    $0x4,%ebx
+  100a1f:	83 c3 04             	add    $0x4,%ebx
 			data = fill_numbuf(numbuf + NUMBUFSIZ, x, 16, lower_digits, precision);
-  1009fe:	8b 53 fc             	mov    -0x4(%ebx),%edx
-  100a01:	55                   	push   %ebp
-  100a02:	68 88 0e 10 00       	push   $0x100e88
-  100a07:	b9 10 00 00 00       	mov    $0x10,%ecx
-  100a0c:	8d 44 24 40          	lea    0x40(%esp),%eax
-  100a10:	e8 4d fe ff ff       	call   100862 <fill_numbuf>
-  100a15:	ba 01 00 00 00       	mov    $0x1,%edx
-  100a1a:	89 44 24 0c          	mov    %eax,0xc(%esp)
-  100a1e:	31 c0                	xor    %eax,%eax
+  100a22:	8b 53 fc             	mov    -0x4(%ebx),%edx
+  100a25:	55                   	push   %ebp
+  100a26:	68 ac 0e 10 00       	push   $0x100eac
+  100a2b:	b9 10 00 00 00       	mov    $0x10,%ecx
+  100a30:	8d 44 24 40          	lea    0x40(%esp),%eax
+  100a34:	e8 4d fe ff ff       	call   100886 <fill_numbuf>
+  100a39:	ba 01 00 00 00       	mov    $0x1,%edx
+  100a3e:	89 44 24 0c          	mov    %eax,0xc(%esp)
+  100a42:	31 c0                	xor    %eax,%eax
 			numeric = 1;
 			break;
-  100a20:	59                   	pop    %ecx
-  100a21:	59                   	pop    %ecx
-  100a22:	eb 69                	jmp    100a8d <console_vprintf+0x1fe>
+  100a44:	59                   	pop    %ecx
+  100a45:	59                   	pop    %ecx
+  100a46:	eb 69                	jmp    100ab1 <console_vprintf+0x1fe>
 		}
 		case 'X': {
 			unsigned x = va_arg(val, unsigned);
-  100a24:	83 c3 04             	add    $0x4,%ebx
+  100a48:	83 c3 04             	add    $0x4,%ebx
 			data = fill_numbuf(numbuf + NUMBUFSIZ, x, 16, upper_digits, precision);
-  100a27:	8b 53 fc             	mov    -0x4(%ebx),%edx
-  100a2a:	55                   	push   %ebp
-  100a2b:	68 74 0e 10 00       	push   $0x100e74
-  100a30:	eb d5                	jmp    100a07 <console_vprintf+0x178>
+  100a4b:	8b 53 fc             	mov    -0x4(%ebx),%edx
+  100a4e:	55                   	push   %ebp
+  100a4f:	68 98 0e 10 00       	push   $0x100e98
+  100a54:	eb d5                	jmp    100a2b <console_vprintf+0x178>
 			numeric = 1;
 			break;
 		}
 		case 's':
 			data = va_arg(val, char *);
-  100a32:	83 c3 04             	add    $0x4,%ebx
-  100a35:	8b 43 fc             	mov    -0x4(%ebx),%eax
-  100a38:	eb 40                	jmp    100a7a <console_vprintf+0x1eb>
+  100a56:	83 c3 04             	add    $0x4,%ebx
+  100a59:	8b 43 fc             	mov    -0x4(%ebx),%eax
+  100a5c:	eb 40                	jmp    100a9e <console_vprintf+0x1eb>
 			break;
 		case 'C':
 			color = va_arg(val, int);
-  100a3a:	83 c3 04             	add    $0x4,%ebx
-  100a3d:	8b 53 fc             	mov    -0x4(%ebx),%edx
-  100a40:	89 54 24 50          	mov    %edx,0x50(%esp)
+  100a5e:	83 c3 04             	add    $0x4,%ebx
+  100a61:	8b 53 fc             	mov    -0x4(%ebx),%edx
+  100a64:	89 54 24 50          	mov    %edx,0x50(%esp)
 			goto done;
-  100a44:	e9 bd 01 00 00       	jmp    100c06 <console_vprintf+0x377>
+  100a68:	e9 bd 01 00 00       	jmp    100c2a <console_vprintf+0x377>
 		case 'c':
 			data = numbuf;
 			numbuf[0] = va_arg(val, int);
-  100a49:	83 c3 04             	add    $0x4,%ebx
-  100a4c:	8b 43 fc             	mov    -0x4(%ebx),%eax
+  100a6d:	83 c3 04             	add    $0x4,%ebx
+  100a70:	8b 43 fc             	mov    -0x4(%ebx),%eax
 			numbuf[1] = '\0';
-  100a4f:	8d 4c 24 24          	lea    0x24(%esp),%ecx
-  100a53:	c6 44 24 25 00       	movb   $0x0,0x25(%esp)
-  100a58:	89 4c 24 04          	mov    %ecx,0x4(%esp)
+  100a73:	8d 4c 24 24          	lea    0x24(%esp),%ecx
+  100a77:	c6 44 24 25 00       	movb   $0x0,0x25(%esp)
+  100a7c:	89 4c 24 04          	mov    %ecx,0x4(%esp)
 		case 'C':
 			color = va_arg(val, int);
 			goto done;
 		case 'c':
 			data = numbuf;
 			numbuf[0] = va_arg(val, int);
-  100a5c:	88 44 24 24          	mov    %al,0x24(%esp)
-  100a60:	eb 27                	jmp    100a89 <console_vprintf+0x1fa>
+  100a80:	88 44 24 24          	mov    %al,0x24(%esp)
+  100a84:	eb 27                	jmp    100aad <console_vprintf+0x1fa>
 			numbuf[1] = '\0';
 			break;
 		normal:
 		default:
 			data = numbuf;
 			numbuf[0] = (*format ? *format : '%');
-  100a62:	84 c0                	test   %al,%al
-  100a64:	75 02                	jne    100a68 <console_vprintf+0x1d9>
-  100a66:	b0 25                	mov    $0x25,%al
-  100a68:	88 44 24 24          	mov    %al,0x24(%esp)
+  100a86:	84 c0                	test   %al,%al
+  100a88:	75 02                	jne    100a8c <console_vprintf+0x1d9>
+  100a8a:	b0 25                	mov    $0x25,%al
+  100a8c:	88 44 24 24          	mov    %al,0x24(%esp)
 			numbuf[1] = '\0';
-  100a6c:	c6 44 24 25 00       	movb   $0x0,0x25(%esp)
+  100a90:	c6 44 24 25 00       	movb   $0x0,0x25(%esp)
 			if (!*format)
-  100a71:	80 3f 00             	cmpb   $0x0,(%edi)
-  100a74:	74 0a                	je     100a80 <console_vprintf+0x1f1>
-  100a76:	8d 44 24 24          	lea    0x24(%esp),%eax
-  100a7a:	89 44 24 04          	mov    %eax,0x4(%esp)
-  100a7e:	eb 09                	jmp    100a89 <console_vprintf+0x1fa>
+  100a95:	80 3f 00             	cmpb   $0x0,(%edi)
+  100a98:	74 0a                	je     100aa4 <console_vprintf+0x1f1>
+  100a9a:	8d 44 24 24          	lea    0x24(%esp),%eax
+  100a9e:	89 44 24 04          	mov    %eax,0x4(%esp)
+  100aa2:	eb 09                	jmp    100aad <console_vprintf+0x1fa>
 				format--;
-  100a80:	8d 54 24 24          	lea    0x24(%esp),%edx
-  100a84:	4f                   	dec    %edi
-  100a85:	89 54 24 04          	mov    %edx,0x4(%esp)
-  100a89:	31 d2                	xor    %edx,%edx
-  100a8b:	31 c0                	xor    %eax,%eax
+  100aa4:	8d 54 24 24          	lea    0x24(%esp),%edx
+  100aa8:	4f                   	dec    %edi
+  100aa9:	89 54 24 04          	mov    %edx,0x4(%esp)
+  100aad:	31 d2                	xor    %edx,%edx
+  100aaf:	31 c0                	xor    %eax,%eax
 			break;
 		}
 
 		if (precision >= 0)
 			len = strnlen(data, precision);
-  100a8d:	31 c9                	xor    %ecx,%ecx
+  100ab1:	31 c9                	xor    %ecx,%ecx
 			if (!*format)
 				format--;
 			break;
 		}
 
 		if (precision >= 0)
-  100a8f:	83 fd ff             	cmp    $0xffffffff,%ebp
-  100a92:	c7 04 24 00 00 00 00 	movl   $0x0,(%esp)
-  100a99:	74 1f                	je     100aba <console_vprintf+0x22b>
-  100a9b:	89 04 24             	mov    %eax,(%esp)
-  100a9e:	eb 01                	jmp    100aa1 <console_vprintf+0x212>
+  100ab3:	83 fd ff             	cmp    $0xffffffff,%ebp
+  100ab6:	c7 04 24 00 00 00 00 	movl   $0x0,(%esp)
+  100abd:	74 1f                	je     100ade <console_vprintf+0x22b>
+  100abf:	89 04 24             	mov    %eax,(%esp)
+  100ac2:	eb 01                	jmp    100ac5 <console_vprintf+0x212>
 size_t
 strnlen(const char *s, size_t maxlen)
 {
 	size_t n;
 	for (n = 0; n != maxlen && *s != '\0'; ++s)
 		++n;
-  100aa0:	41                   	inc    %ecx
+  100ac4:	41                   	inc    %ecx
 
 size_t
 strnlen(const char *s, size_t maxlen)
 {
 	size_t n;
 	for (n = 0; n != maxlen && *s != '\0'; ++s)
-  100aa1:	39 e9                	cmp    %ebp,%ecx
-  100aa3:	74 0a                	je     100aaf <console_vprintf+0x220>
-  100aa5:	8b 44 24 04          	mov    0x4(%esp),%eax
-  100aa9:	80 3c 08 00          	cmpb   $0x0,(%eax,%ecx,1)
-  100aad:	75 f1                	jne    100aa0 <console_vprintf+0x211>
-  100aaf:	8b 04 24             	mov    (%esp),%eax
+  100ac5:	39 e9                	cmp    %ebp,%ecx
+  100ac7:	74 0a                	je     100ad3 <console_vprintf+0x220>
+  100ac9:	8b 44 24 04          	mov    0x4(%esp),%eax
+  100acd:	80 3c 08 00          	cmpb   $0x0,(%eax,%ecx,1)
+  100ad1:	75 f1                	jne    100ac4 <console_vprintf+0x211>
+  100ad3:	8b 04 24             	mov    (%esp),%eax
 				format--;
 			break;
 		}
 
 		if (precision >= 0)
 			len = strnlen(data, precision);
-  100ab2:	89 0c 24             	mov    %ecx,(%esp)
-  100ab5:	eb 1f                	jmp    100ad6 <console_vprintf+0x247>
+  100ad6:	89 0c 24             	mov    %ecx,(%esp)
+  100ad9:	eb 1f                	jmp    100afa <console_vprintf+0x247>
 size_t
 strlen(const char *s)
 {
 	size_t n;
 	for (n = 0; *s != '\0'; ++s)
 		++n;
-  100ab7:	42                   	inc    %edx
-  100ab8:	eb 09                	jmp    100ac3 <console_vprintf+0x234>
-  100aba:	89 d1                	mov    %edx,%ecx
-  100abc:	8b 14 24             	mov    (%esp),%edx
-  100abf:	89 44 24 08          	mov    %eax,0x8(%esp)
+  100adb:	42                   	inc    %edx
+  100adc:	eb 09                	jmp    100ae7 <console_vprintf+0x234>
+  100ade:	89 d1                	mov    %edx,%ecx
+  100ae0:	8b 14 24             	mov    (%esp),%edx
+  100ae3:	89 44 24 08          	mov    %eax,0x8(%esp)
 
 size_t
 strlen(const char *s)
 {
 	size_t n;
 	for (n = 0; *s != '\0'; ++s)
-  100ac3:	8b 44 24 04          	mov    0x4(%esp),%eax
-  100ac7:	80 3c 10 00          	cmpb   $0x0,(%eax,%edx,1)
-  100acb:	75 ea                	jne    100ab7 <console_vprintf+0x228>
-  100acd:	8b 44 24 08          	mov    0x8(%esp),%eax
-  100ad1:	89 14 24             	mov    %edx,(%esp)
-  100ad4:	89 ca                	mov    %ecx,%edx
+  100ae7:	8b 44 24 04          	mov    0x4(%esp),%eax
+  100aeb:	80 3c 10 00          	cmpb   $0x0,(%eax,%edx,1)
+  100aef:	75 ea                	jne    100adb <console_vprintf+0x228>
+  100af1:	8b 44 24 08          	mov    0x8(%esp),%eax
+  100af5:	89 14 24             	mov    %edx,(%esp)
+  100af8:	89 ca                	mov    %ecx,%edx
 
 		if (precision >= 0)
 			len = strnlen(data, precision);
 		else
 			len = strlen(data);
 		if (numeric && negative)
-  100ad6:	85 c0                	test   %eax,%eax
-  100ad8:	74 0c                	je     100ae6 <console_vprintf+0x257>
-  100ada:	84 d2                	test   %dl,%dl
-  100adc:	c7 44 24 08 2d 00 00 	movl   $0x2d,0x8(%esp)
-  100ae3:	00 
-  100ae4:	75 24                	jne    100b0a <console_vprintf+0x27b>
+  100afa:	85 c0                	test   %eax,%eax
+  100afc:	74 0c                	je     100b0a <console_vprintf+0x257>
+  100afe:	84 d2                	test   %dl,%dl
+  100b00:	c7 44 24 08 2d 00 00 	movl   $0x2d,0x8(%esp)
+  100b07:	00 
+  100b08:	75 24                	jne    100b2e <console_vprintf+0x27b>
 			negative = '-';
 		else if (flags & FLAG_PLUSPOSITIVE)
-  100ae6:	f6 44 24 14 10       	testb  $0x10,0x14(%esp)
-  100aeb:	c7 44 24 08 2b 00 00 	movl   $0x2b,0x8(%esp)
-  100af2:	00 
-  100af3:	75 15                	jne    100b0a <console_vprintf+0x27b>
+  100b0a:	f6 44 24 14 10       	testb  $0x10,0x14(%esp)
+  100b0f:	c7 44 24 08 2b 00 00 	movl   $0x2b,0x8(%esp)
+  100b16:	00 
+  100b17:	75 15                	jne    100b2e <console_vprintf+0x27b>
 			negative = '+';
 		else if (flags & FLAG_SPACEPOSITIVE)
-  100af5:	8b 44 24 14          	mov    0x14(%esp),%eax
-  100af9:	83 e0 08             	and    $0x8,%eax
-  100afc:	83 f8 01             	cmp    $0x1,%eax
-  100aff:	19 c9                	sbb    %ecx,%ecx
-  100b01:	f7 d1                	not    %ecx
-  100b03:	83 e1 20             	and    $0x20,%ecx
-  100b06:	89 4c 24 08          	mov    %ecx,0x8(%esp)
+  100b19:	8b 44 24 14          	mov    0x14(%esp),%eax
+  100b1d:	83 e0 08             	and    $0x8,%eax
+  100b20:	83 f8 01             	cmp    $0x1,%eax
+  100b23:	19 c9                	sbb    %ecx,%ecx
+  100b25:	f7 d1                	not    %ecx
+  100b27:	83 e1 20             	and    $0x20,%ecx
+  100b2a:	89 4c 24 08          	mov    %ecx,0x8(%esp)
 			negative = ' ';
 		else
 			negative = 0;
 		if (numeric && precision > len)
-  100b0a:	3b 2c 24             	cmp    (%esp),%ebp
-  100b0d:	7e 0d                	jle    100b1c <console_vprintf+0x28d>
-  100b0f:	84 d2                	test   %dl,%dl
-  100b11:	74 40                	je     100b53 <console_vprintf+0x2c4>
+  100b2e:	3b 2c 24             	cmp    (%esp),%ebp
+  100b31:	7e 0d                	jle    100b40 <console_vprintf+0x28d>
+  100b33:	84 d2                	test   %dl,%dl
+  100b35:	74 40                	je     100b77 <console_vprintf+0x2c4>
 			zeros = precision - len;
-  100b13:	2b 2c 24             	sub    (%esp),%ebp
-  100b16:	89 6c 24 10          	mov    %ebp,0x10(%esp)
-  100b1a:	eb 3f                	jmp    100b5b <console_vprintf+0x2cc>
+  100b37:	2b 2c 24             	sub    (%esp),%ebp
+  100b3a:	89 6c 24 10          	mov    %ebp,0x10(%esp)
+  100b3e:	eb 3f                	jmp    100b7f <console_vprintf+0x2cc>
 		else if ((flags & (FLAG_ZERO | FLAG_LEFTJUSTIFY)) == FLAG_ZERO
-  100b1c:	84 d2                	test   %dl,%dl
-  100b1e:	74 33                	je     100b53 <console_vprintf+0x2c4>
-  100b20:	8b 44 24 14          	mov    0x14(%esp),%eax
-  100b24:	83 e0 06             	and    $0x6,%eax
-  100b27:	83 f8 02             	cmp    $0x2,%eax
-  100b2a:	75 27                	jne    100b53 <console_vprintf+0x2c4>
-  100b2c:	45                   	inc    %ebp
-  100b2d:	75 24                	jne    100b53 <console_vprintf+0x2c4>
+  100b40:	84 d2                	test   %dl,%dl
+  100b42:	74 33                	je     100b77 <console_vprintf+0x2c4>
+  100b44:	8b 44 24 14          	mov    0x14(%esp),%eax
+  100b48:	83 e0 06             	and    $0x6,%eax
+  100b4b:	83 f8 02             	cmp    $0x2,%eax
+  100b4e:	75 27                	jne    100b77 <console_vprintf+0x2c4>
+  100b50:	45                   	inc    %ebp
+  100b51:	75 24                	jne    100b77 <console_vprintf+0x2c4>
 			 && numeric && precision < 0
 			 && len + !!negative < width)
-  100b2f:	31 c0                	xor    %eax,%eax
+  100b53:	31 c0                	xor    %eax,%eax
 			negative = ' ';
 		else
 			negative = 0;
 		if (numeric && precision > len)
 			zeros = precision - len;
 		else if ((flags & (FLAG_ZERO | FLAG_LEFTJUSTIFY)) == FLAG_ZERO
-  100b31:	8b 0c 24             	mov    (%esp),%ecx
+  100b55:	8b 0c 24             	mov    (%esp),%ecx
 			 && numeric && precision < 0
 			 && len + !!negative < width)
-  100b34:	83 7c 24 08 00       	cmpl   $0x0,0x8(%esp)
-  100b39:	0f 95 c0             	setne  %al
+  100b58:	83 7c 24 08 00       	cmpl   $0x0,0x8(%esp)
+  100b5d:	0f 95 c0             	setne  %al
 			negative = ' ';
 		else
 			negative = 0;
 		if (numeric && precision > len)
 			zeros = precision - len;
 		else if ((flags & (FLAG_ZERO | FLAG_LEFTJUSTIFY)) == FLAG_ZERO
-  100b3c:	8d 14 08             	lea    (%eax,%ecx,1),%edx
-  100b3f:	3b 54 24 0c          	cmp    0xc(%esp),%edx
-  100b43:	7d 0e                	jge    100b53 <console_vprintf+0x2c4>
-			 && numeric && precision < 0
-			 && len + !!negative < width)
-			zeros = width - len - !!negative;
-  100b45:	8b 54 24 0c          	mov    0xc(%esp),%edx
-  100b49:	29 ca                	sub    %ecx,%edx
-  100b4b:	29 c2                	sub    %eax,%edx
-  100b4d:	89 54 24 10          	mov    %edx,0x10(%esp)
-			negative = ' ';
-		else
-			negative = 0;
-		if (numeric && precision > len)
-			zeros = precision - len;
-		else if ((flags & (FLAG_ZERO | FLAG_LEFTJUSTIFY)) == FLAG_ZERO
-  100b51:	eb 08                	jmp    100b5b <console_vprintf+0x2cc>
-  100b53:	c7 44 24 10 00 00 00 	movl   $0x0,0x10(%esp)
-  100b5a:	00 
+  100b60:	8d 14 08             	lea    (%eax,%ecx,1),%edx
+  100b63:	3b 54 24 0c          	cmp    0xc(%esp),%edx
+  100b67:	7d 0e                	jge    100b77 <console_vprintf+0x2c4>
 			 && numeric && precision < 0
 			 && len + !!negative < width)
 			zeros = width - len - !!negative;
+  100b69:	8b 54 24 0c          	mov    0xc(%esp),%edx
+  100b6d:	29 ca                	sub    %ecx,%edx
+  100b6f:	29 c2                	sub    %eax,%edx
+  100b71:	89 54 24 10          	mov    %edx,0x10(%esp)
+			negative = ' ';
 		else
-			zeros = 0;
-		width -= len + zeros + !!negative;
-  100b5b:	8b 6c 24 0c          	mov    0xc(%esp),%ebp
-  100b5f:	31 c0                	xor    %eax,%eax
-		for (; !(flags & FLAG_LEFTJUSTIFY) && width > 0; --width)
-  100b61:	8b 4c 24 14          	mov    0x14(%esp),%ecx
+			negative = 0;
+		if (numeric && precision > len)
+			zeros = precision - len;
+		else if ((flags & (FLAG_ZERO | FLAG_LEFTJUSTIFY)) == FLAG_ZERO
+  100b75:	eb 08                	jmp    100b7f <console_vprintf+0x2cc>
+  100b77:	c7 44 24 10 00 00 00 	movl   $0x0,0x10(%esp)
+  100b7e:	00 
 			 && numeric && precision < 0
 			 && len + !!negative < width)
 			zeros = width - len - !!negative;
 		else
 			zeros = 0;
 		width -= len + zeros + !!negative;
-  100b65:	2b 2c 24             	sub    (%esp),%ebp
-  100b68:	83 7c 24 08 00       	cmpl   $0x0,0x8(%esp)
-  100b6d:	0f 95 c0             	setne  %al
+  100b7f:	8b 6c 24 0c          	mov    0xc(%esp),%ebp
+  100b83:	31 c0                	xor    %eax,%eax
 		for (; !(flags & FLAG_LEFTJUSTIFY) && width > 0; --width)
-  100b70:	83 e1 04             	and    $0x4,%ecx
+  100b85:	8b 4c 24 14          	mov    0x14(%esp),%ecx
 			 && numeric && precision < 0
 			 && len + !!negative < width)
 			zeros = width - len - !!negative;
 		else
 			zeros = 0;
 		width -= len + zeros + !!negative;
-  100b73:	29 c5                	sub    %eax,%ebp
-  100b75:	89 f0                	mov    %esi,%eax
-  100b77:	2b 6c 24 10          	sub    0x10(%esp),%ebp
+  100b89:	2b 2c 24             	sub    (%esp),%ebp
+  100b8c:	83 7c 24 08 00       	cmpl   $0x0,0x8(%esp)
+  100b91:	0f 95 c0             	setne  %al
 		for (; !(flags & FLAG_LEFTJUSTIFY) && width > 0; --width)
-  100b7b:	89 4c 24 0c          	mov    %ecx,0xc(%esp)
-  100b7f:	eb 0f                	jmp    100b90 <console_vprintf+0x301>
+  100b94:	83 e1 04             	and    $0x4,%ecx
+			 && numeric && precision < 0
+			 && len + !!negative < width)
+			zeros = width - len - !!negative;
+		else
+			zeros = 0;
+		width -= len + zeros + !!negative;
+  100b97:	29 c5                	sub    %eax,%ebp
+  100b99:	89 f0                	mov    %esi,%eax
+  100b9b:	2b 6c 24 10          	sub    0x10(%esp),%ebp
+		for (; !(flags & FLAG_LEFTJUSTIFY) && width > 0; --width)
+  100b9f:	89 4c 24 0c          	mov    %ecx,0xc(%esp)
+  100ba3:	eb 0f                	jmp    100bb4 <console_vprintf+0x301>
 			cursor = console_putc(cursor, ' ', color);
-  100b81:	8b 4c 24 50          	mov    0x50(%esp),%ecx
-  100b85:	ba 20 00 00 00       	mov    $0x20,%edx
+  100ba5:	8b 4c 24 50          	mov    0x50(%esp),%ecx
+  100ba9:	ba 20 00 00 00       	mov    $0x20,%edx
 			 && len + !!negative < width)
 			zeros = width - len - !!negative;
 		else
 			zeros = 0;
 		width -= len + zeros + !!negative;
 		for (; !(flags & FLAG_LEFTJUSTIFY) && width > 0; --width)
-  100b8a:	4d                   	dec    %ebp
+  100bae:	4d                   	dec    %ebp
 			cursor = console_putc(cursor, ' ', color);
-  100b8b:	e8 83 fc ff ff       	call   100813 <console_putc>
+  100baf:	e8 83 fc ff ff       	call   100837 <console_putc>
 			 && len + !!negative < width)
 			zeros = width - len - !!negative;
 		else
 			zeros = 0;
 		width -= len + zeros + !!negative;
 		for (; !(flags & FLAG_LEFTJUSTIFY) && width > 0; --width)
-  100b90:	85 ed                	test   %ebp,%ebp
-  100b92:	7e 07                	jle    100b9b <console_vprintf+0x30c>
-  100b94:	83 7c 24 0c 00       	cmpl   $0x0,0xc(%esp)
-  100b99:	74 e6                	je     100b81 <console_vprintf+0x2f2>
+  100bb4:	85 ed                	test   %ebp,%ebp
+  100bb6:	7e 07                	jle    100bbf <console_vprintf+0x30c>
+  100bb8:	83 7c 24 0c 00       	cmpl   $0x0,0xc(%esp)
+  100bbd:	74 e6                	je     100ba5 <console_vprintf+0x2f2>
 			cursor = console_putc(cursor, ' ', color);
 		if (negative)
-  100b9b:	83 7c 24 08 00       	cmpl   $0x0,0x8(%esp)
-  100ba0:	89 c6                	mov    %eax,%esi
-  100ba2:	74 23                	je     100bc7 <console_vprintf+0x338>
+  100bbf:	83 7c 24 08 00       	cmpl   $0x0,0x8(%esp)
+  100bc4:	89 c6                	mov    %eax,%esi
+  100bc6:	74 23                	je     100beb <console_vprintf+0x338>
 			cursor = console_putc(cursor, negative, color);
-  100ba4:	0f b6 54 24 08       	movzbl 0x8(%esp),%edx
-  100ba9:	8b 4c 24 50          	mov    0x50(%esp),%ecx
-  100bad:	e8 61 fc ff ff       	call   100813 <console_putc>
-  100bb2:	89 c6                	mov    %eax,%esi
-  100bb4:	eb 11                	jmp    100bc7 <console_vprintf+0x338>
+  100bc8:	0f b6 54 24 08       	movzbl 0x8(%esp),%edx
+  100bcd:	8b 4c 24 50          	mov    0x50(%esp),%ecx
+  100bd1:	e8 61 fc ff ff       	call   100837 <console_putc>
+  100bd6:	89 c6                	mov    %eax,%esi
+  100bd8:	eb 11                	jmp    100beb <console_vprintf+0x338>
 		for (; zeros > 0; --zeros)
 			cursor = console_putc(cursor, '0', color);
-  100bb6:	8b 4c 24 50          	mov    0x50(%esp),%ecx
-  100bba:	ba 30 00 00 00       	mov    $0x30,%edx
+  100bda:	8b 4c 24 50          	mov    0x50(%esp),%ecx
+  100bde:	ba 30 00 00 00       	mov    $0x30,%edx
 		width -= len + zeros + !!negative;
 		for (; !(flags & FLAG_LEFTJUSTIFY) && width > 0; --width)
 			cursor = console_putc(cursor, ' ', color);
 		if (negative)
 			cursor = console_putc(cursor, negative, color);
 		for (; zeros > 0; --zeros)
-  100bbf:	4e                   	dec    %esi
+  100be3:	4e                   	dec    %esi
 			cursor = console_putc(cursor, '0', color);
-  100bc0:	e8 4e fc ff ff       	call   100813 <console_putc>
-  100bc5:	eb 06                	jmp    100bcd <console_vprintf+0x33e>
-  100bc7:	89 f0                	mov    %esi,%eax
-  100bc9:	8b 74 24 10          	mov    0x10(%esp),%esi
+  100be4:	e8 4e fc ff ff       	call   100837 <console_putc>
+  100be9:	eb 06                	jmp    100bf1 <console_vprintf+0x33e>
+  100beb:	89 f0                	mov    %esi,%eax
+  100bed:	8b 74 24 10          	mov    0x10(%esp),%esi
 		width -= len + zeros + !!negative;
 		for (; !(flags & FLAG_LEFTJUSTIFY) && width > 0; --width)
 			cursor = console_putc(cursor, ' ', color);
 		if (negative)
 			cursor = console_putc(cursor, negative, color);
 		for (; zeros > 0; --zeros)
-  100bcd:	85 f6                	test   %esi,%esi
-  100bcf:	7f e5                	jg     100bb6 <console_vprintf+0x327>
-  100bd1:	8b 34 24             	mov    (%esp),%esi
-  100bd4:	eb 15                	jmp    100beb <console_vprintf+0x35c>
+  100bf1:	85 f6                	test   %esi,%esi
+  100bf3:	7f e5                	jg     100bda <console_vprintf+0x327>
+  100bf5:	8b 34 24             	mov    (%esp),%esi
+  100bf8:	eb 15                	jmp    100c0f <console_vprintf+0x35c>
 			cursor = console_putc(cursor, '0', color);
 		for (; len > 0; ++data, --len)
 			cursor = console_putc(cursor, *data, color);
-  100bd6:	8b 4c 24 04          	mov    0x4(%esp),%ecx
+  100bfa:	8b 4c 24 04          	mov    0x4(%esp),%ecx
 			cursor = console_putc(cursor, ' ', color);
 		if (negative)
 			cursor = console_putc(cursor, negative, color);
 		for (; zeros > 0; --zeros)
 			cursor = console_putc(cursor, '0', color);
 		for (; len > 0; ++data, --len)
-  100bda:	4e                   	dec    %esi
+  100bfe:	4e                   	dec    %esi
 			cursor = console_putc(cursor, *data, color);
-  100bdb:	0f b6 11             	movzbl (%ecx),%edx
-  100bde:	8b 4c 24 50          	mov    0x50(%esp),%ecx
-  100be2:	e8 2c fc ff ff       	call   100813 <console_putc>
+  100bff:	0f b6 11             	movzbl (%ecx),%edx
+  100c02:	8b 4c 24 50          	mov    0x50(%esp),%ecx
+  100c06:	e8 2c fc ff ff       	call   100837 <console_putc>
 			cursor = console_putc(cursor, ' ', color);
 		if (negative)
 			cursor = console_putc(cursor, negative, color);
 		for (; zeros > 0; --zeros)
 			cursor = console_putc(cursor, '0', color);
 		for (; len > 0; ++data, --len)
-  100be7:	ff 44 24 04          	incl   0x4(%esp)
-  100beb:	85 f6                	test   %esi,%esi
-  100bed:	7f e7                	jg     100bd6 <console_vprintf+0x347>
-  100bef:	eb 0f                	jmp    100c00 <console_vprintf+0x371>
-			cursor = console_putc(cursor, *data, color);
-		for (; width > 0; --width)
-			cursor = console_putc(cursor, ' ', color);
-  100bf1:	8b 4c 24 50          	mov    0x50(%esp),%ecx
-  100bf5:	ba 20 00 00 00       	mov    $0x20,%edx
-			cursor = console_putc(cursor, negative, color);
-		for (; zeros > 0; --zeros)
-			cursor = console_putc(cursor, '0', color);
-		for (; len > 0; ++data, --len)
+  100c0b:	ff 44 24 04          	incl   0x4(%esp)
+  100c0f:	85 f6                	test   %esi,%esi
+  100c11:	7f e7                	jg     100bfa <console_vprintf+0x347>
+  100c13:	eb 0f                	jmp    100c24 <console_vprintf+0x371>
 			cursor = console_putc(cursor, *data, color);
 		for (; width > 0; --width)
-  100bfa:	4d                   	dec    %ebp
 			cursor = console_putc(cursor, ' ', color);
-  100bfb:	e8 13 fc ff ff       	call   100813 <console_putc>
+  100c15:	8b 4c 24 50          	mov    0x50(%esp),%ecx
+  100c19:	ba 20 00 00 00       	mov    $0x20,%edx
 			cursor = console_putc(cursor, negative, color);
 		for (; zeros > 0; --zeros)
 			cursor = console_putc(cursor, '0', color);
 		for (; len > 0; ++data, --len)
 			cursor = console_putc(cursor, *data, color);
 		for (; width > 0; --width)
-  100c00:	85 ed                	test   %ebp,%ebp
-  100c02:	7f ed                	jg     100bf1 <console_vprintf+0x362>
-  100c04:	89 c6                	mov    %eax,%esi
+  100c1e:	4d                   	dec    %ebp
+			cursor = console_putc(cursor, ' ', color);
+  100c1f:	e8 13 fc ff ff       	call   100837 <console_putc>
+			cursor = console_putc(cursor, negative, color);
+		for (; zeros > 0; --zeros)
+			cursor = console_putc(cursor, '0', color);
+		for (; len > 0; ++data, --len)
+			cursor = console_putc(cursor, *data, color);
+		for (; width > 0; --width)
+  100c24:	85 ed                	test   %ebp,%ebp
+  100c26:	7f ed                	jg     100c15 <console_vprintf+0x362>
+  100c28:	89 c6                	mov    %eax,%esi
 	int flags, width, zeros, precision, negative, numeric, len;
 #define NUMBUFSIZ 20
 	char numbuf[NUMBUFSIZ];
 	char *data;
 
 	for (; *format; ++format) {
-  100c06:	47                   	inc    %edi
-  100c07:	8a 17                	mov    (%edi),%dl
-  100c09:	84 d2                	test   %dl,%dl
-  100c0b:	0f 85 96 fc ff ff    	jne    1008a7 <console_vprintf+0x18>
+  100c2a:	47                   	inc    %edi
+  100c2b:	8a 17                	mov    (%edi),%dl
+  100c2d:	84 d2                	test   %dl,%dl
+  100c2f:	0f 85 96 fc ff ff    	jne    1008cb <console_vprintf+0x18>
 			cursor = console_putc(cursor, ' ', color);
 	done: ;
 	}
 
 	return cursor;
 }
-  100c11:	83 c4 38             	add    $0x38,%esp
-  100c14:	89 f0                	mov    %esi,%eax
-  100c16:	5b                   	pop    %ebx
-  100c17:	5e                   	pop    %esi
-  100c18:	5f                   	pop    %edi
-  100c19:	5d                   	pop    %ebp
-  100c1a:	c3                   	ret    
+  100c35:	83 c4 38             	add    $0x38,%esp
+  100c38:	89 f0                	mov    %esi,%eax
+  100c3a:	5b                   	pop    %ebx
+  100c3b:	5e                   	pop    %esi
+  100c3c:	5f                   	pop    %edi
+  100c3d:	5d                   	pop    %ebp
+  100c3e:	c3                   	ret    
 			const char *flagc = flag_chars;
 			while (*flagc != '\0' && *flagc != *format)
 				++flagc;
 			if (*flagc == '\0')
 				break;
 			flags |= (1 << (flagc - flag_chars));
-  100c1b:	81 e9 6c 0e 10 00    	sub    $0x100e6c,%ecx
-  100c21:	b8 01 00 00 00       	mov    $0x1,%eax
-  100c26:	d3 e0                	shl    %cl,%eax
+  100c3f:	81 e9 90 0e 10 00    	sub    $0x100e90,%ecx
+  100c45:	b8 01 00 00 00       	mov    $0x1,%eax
+  100c4a:	d3 e0                	shl    %cl,%eax
 			continue;
 		}
 
 		// process flags
 		flags = 0;
 		for (++format; *format; ++format) {
-  100c28:	47                   	inc    %edi
+  100c4c:	47                   	inc    %edi
 			const char *flagc = flag_chars;
 			while (*flagc != '\0' && *flagc != *format)
 				++flagc;
 			if (*flagc == '\0')
 				break;
 			flags |= (1 << (flagc - flag_chars));
-  100c29:	09 44 24 14          	or     %eax,0x14(%esp)
-  100c2d:	e9 aa fc ff ff       	jmp    1008dc <console_vprintf+0x4d>
+  100c4d:	09 44 24 14          	or     %eax,0x14(%esp)
+  100c51:	e9 aa fc ff ff       	jmp    100900 <console_vprintf+0x4d>
 
-00100c32 <console_printf>:
+00100c56 <console_printf>:
 uint16_t *
 console_printf(uint16_t *cursor, int color, const char *format, ...)
 {
 	va_list val;
 	va_start(val, format);
 	cursor = console_vprintf(cursor, color, format, val);
-  100c32:	8d 44 24 10          	lea    0x10(%esp),%eax
-  100c36:	50                   	push   %eax
-  100c37:	ff 74 24 10          	pushl  0x10(%esp)
-  100c3b:	ff 74 24 10          	pushl  0x10(%esp)
-  100c3f:	ff 74 24 10          	pushl  0x10(%esp)
-  100c43:	e8 47 fc ff ff       	call   10088f <console_vprintf>
-  100c48:	83 c4 10             	add    $0x10,%esp
+  100c56:	8d 44 24 10          	lea    0x10(%esp),%eax
+  100c5a:	50                   	push   %eax
+  100c5b:	ff 74 24 10          	pushl  0x10(%esp)
+  100c5f:	ff 74 24 10          	pushl  0x10(%esp)
+  100c63:	ff 74 24 10          	pushl  0x10(%esp)
+  100c67:	e8 47 fc ff ff       	call   1008b3 <console_vprintf>
+  100c6c:	83 c4 10             	add    $0x10,%esp
 	va_end(val);
 	return cursor;
 }
-  100c4b:	c3                   	ret    
+  100c6f:	c3                   	ret    
 
-00100c4c <Random>:
+00100c70 <Random>:
 {
   const long Q = MODULUS / MULTIPLIER;
   const long R = MODULUS % MULTIPLIER;
         long t;
 
   t = MULTIPLIER * (seed[stream] % Q) - R * (seed[stream] / Q);
-  100c4c:	8b 0d a8 83 10 00    	mov    0x1083a8,%ecx
+  100c70:	8b 0d a8 83 10 00    	mov    0x1083a8,%ecx
 /* ----------------------------------------------------------------
  * Random returns a pseudo-random real number uniformly distributed 
  * between 0.0 and 1.0. 
  * ----------------------------------------------------------------
  */
 {
-  100c52:	56                   	push   %esi
+  100c76:	56                   	push   %esi
   const long Q = MODULUS / MULTIPLIER;
   const long R = MODULUS % MULTIPLIER;
         long t;
 
   t = MULTIPLIER * (seed[stream] % Q) - R * (seed[stream] / Q);
-  100c53:	be c8 ad 00 00       	mov    $0xadc8,%esi
+  100c77:	be c8 ad 00 00       	mov    $0xadc8,%esi
 /* ----------------------------------------------------------------
  * Random returns a pseudo-random real number uniformly distributed 
  * between 0.0 and 1.0. 
  * ----------------------------------------------------------------
  */
 {
-  100c58:	53                   	push   %ebx
+  100c7c:	53                   	push   %ebx
   const long Q = MODULUS / MULTIPLIER;
   const long R = MODULUS % MULTIPLIER;
         long t;
 
   t = MULTIPLIER * (seed[stream] % Q) - R * (seed[stream] / Q);
-  100c59:	bb 38 52 ff ff       	mov    $0xffff5238,%ebx
-  100c5e:	8b 04 8d 60 10 10 00 	mov    0x101060(,%ecx,4),%eax
-  100c65:	99                   	cltd   
-  100c66:	f7 fb                	idiv   %ebx
-  100c68:	69 d8 47 0d 00 00    	imul   $0xd47,%eax,%ebx
-  100c6e:	8b 04 8d 60 10 10 00 	mov    0x101060(,%ecx,4),%eax
-  100c75:	99                   	cltd   
-  100c76:	f7 fe                	idiv   %esi
-  100c78:	69 d2 8f bc 00 00    	imul   $0xbc8f,%edx,%edx
-  100c7e:	01 d3                	add    %edx,%ebx
+  100c7d:	bb 38 52 ff ff       	mov    $0xffff5238,%ebx
+  100c82:	8b 04 8d 60 10 10 00 	mov    0x101060(,%ecx,4),%eax
+  100c89:	99                   	cltd   
+  100c8a:	f7 fb                	idiv   %ebx
+  100c8c:	69 d8 47 0d 00 00    	imul   $0xd47,%eax,%ebx
+  100c92:	8b 04 8d 60 10 10 00 	mov    0x101060(,%ecx,4),%eax
+  100c99:	99                   	cltd   
+  100c9a:	f7 fe                	idiv   %esi
+  100c9c:	69 d2 8f bc 00 00    	imul   $0xbc8f,%edx,%edx
+  100ca2:	01 d3                	add    %edx,%ebx
   if (t > 0) 
-  100c80:	85 db                	test   %ebx,%ebx
-  100c82:	7f 06                	jg     100c8a <Random+0x3e>
+  100ca4:	85 db                	test   %ebx,%ebx
+  100ca6:	7f 06                	jg     100cae <Random+0x3e>
     seed[stream] = t;
   else 
     seed[stream] = t + MODULUS;
-  100c84:	81 c3 ff ff ff 7f    	add    $0x7fffffff,%ebx
-  100c8a:	89 1c 8d 60 10 10 00 	mov    %ebx,0x101060(,%ecx,4)
-  100c91:	dd 05 a0 0e 10 00    	fldl   0x100ea0
-  100c97:	da 3c 8d 60 10 10 00 	fidivrl 0x101060(,%ecx,4)
+  100ca8:	81 c3 ff ff ff 7f    	add    $0x7fffffff,%ebx
+  100cae:	89 1c 8d 60 10 10 00 	mov    %ebx,0x101060(,%ecx,4)
+  100cb5:	dd 05 c0 0e 10 00    	fldl   0x100ec0
+  100cbb:	da 3c 8d 60 10 10 00 	fidivrl 0x101060(,%ecx,4)
   return ((double) seed[stream] / MODULUS);
 }
-  100c9e:	5b                   	pop    %ebx
-  100c9f:	5e                   	pop    %esi
-  100ca0:	c3                   	ret    
+  100cc2:	5b                   	pop    %ebx
+  100cc3:	5e                   	pop    %esi
+  100cc4:	c3                   	ret    
 
-00100ca1 <PutSeed>:
+00100cc5 <PutSeed>:
  *    if x > 0 then x is the state (unless too large)
  *    if x < 0 then the state is obtained from the system clock
  *    if x = 0 then the state is to be supplied interactively
  * ---------------------------------------------------------------
  */
 {
-  100ca1:	8b 54 24 04          	mov    0x4(%esp),%edx
+  100cc5:	8b 54 24 04          	mov    0x4(%esp),%edx
   char ok = 0;
 
   if (x > 0)
-  100ca5:	85 d2                	test   %edx,%edx
-  100ca7:	7e 0a                	jle    100cb3 <PutSeed+0x12>
+  100cc9:	85 d2                	test   %edx,%edx
+  100ccb:	7e 0a                	jle    100cd7 <PutSeed+0x12>
     x = x % MODULUS;                       /* correct if x is too large  */
-  100ca9:	89 d0                	mov    %edx,%eax
-  100cab:	b9 ff ff ff 7f       	mov    $0x7fffffff,%ecx
-  100cb0:	99                   	cltd   
-  100cb1:	f7 f9                	idiv   %ecx
+  100ccd:	89 d0                	mov    %edx,%eax
+  100ccf:	b9 ff ff ff 7f       	mov    $0x7fffffff,%ecx
+  100cd4:	99                   	cltd   
+  100cd5:	f7 f9                	idiv   %ecx
   if (x < 0)                                 
-  100cb3:	83 fa 00             	cmp    $0x0,%edx
-  100cb6:	7c 02                	jl     100cba <PutSeed+0x19>
+  100cd7:	83 fa 00             	cmp    $0x0,%edx
+  100cda:	7c 02                	jl     100cde <PutSeed+0x19>
     x = 10086 % MODULUS;              
   if (x == 0)                                
-  100cb8:	75 05                	jne    100cbf <PutSeed+0x1e>
-  100cba:	ba 66 27 00 00       	mov    $0x2766,%edx
+  100cdc:	75 05                	jne    100ce3 <PutSeed+0x1e>
+  100cde:	ba 66 27 00 00       	mov    $0x2766,%edx
     x = 10086 % MODULUS;              
   seed[stream] = x;
-  100cbf:	a1 a8 83 10 00       	mov    0x1083a8,%eax
-  100cc4:	89 14 85 60 10 10 00 	mov    %edx,0x101060(,%eax,4)
+  100ce3:	a1 a8 83 10 00       	mov    0x1083a8,%eax
+  100ce8:	89 14 85 60 10 10 00 	mov    %edx,0x101060(,%eax,4)
 }
-  100ccb:	c3                   	ret    
+  100cef:	c3                   	ret    
 
-00100ccc <GetSeed>:
+00100cf0 <GetSeed>:
  * Use this function to get the state of the current random number 
  * generator stream.                                                   
  * ---------------------------------------------------------------
  */
 {
   *x = seed[stream];
-  100ccc:	a1 a8 83 10 00       	mov    0x1083a8,%eax
-  100cd1:	8b 14 85 60 10 10 00 	mov    0x101060(,%eax,4),%edx
-  100cd8:	8b 44 24 04          	mov    0x4(%esp),%eax
-  100cdc:	89 10                	mov    %edx,(%eax)
+  100cf0:	a1 a8 83 10 00       	mov    0x1083a8,%eax
+  100cf5:	8b 14 85 60 10 10 00 	mov    0x101060(,%eax,4),%edx
+  100cfc:	8b 44 24 04          	mov    0x4(%esp),%eax
+  100d00:	89 10                	mov    %edx,(%eax)
 }
-  100cde:	c3                   	ret    
+  100d02:	c3                   	ret    
 
-00100cdf <SelectStream>:
+00100d03 <SelectStream>:
 /* ------------------------------------------------------------------
  * Use this function to set the current random number generator
  * stream -- that stream from which the next random number will come.
  * ------------------------------------------------------------------
  */
 {
-  100cdf:	83 ec 0c             	sub    $0xc,%esp
+  100d03:	83 ec 0c             	sub    $0xc,%esp
   stream = ((unsigned int) index) % STREAMS;
-  100ce2:	8b 44 24 10          	mov    0x10(%esp),%eax
-  100ce6:	25 ff 00 00 00       	and    $0xff,%eax
+  100d06:	8b 44 24 10          	mov    0x10(%esp),%eax
+  100d0a:	25 ff 00 00 00       	and    $0xff,%eax
   if ((initialized == 0) && (stream != 0))   /* protect against        */
-  100ceb:	83 3d ac 83 10 00 00 	cmpl   $0x0,0x1083ac
+  100d0f:	83 3d ac 83 10 00 00 	cmpl   $0x0,0x1083ac
  * Use this function to set the current random number generator
  * stream -- that stream from which the next random number will come.
  * ------------------------------------------------------------------
  */
 {
   stream = ((unsigned int) index) % STREAMS;
-  100cf2:	a3 a8 83 10 00       	mov    %eax,0x1083a8
+  100d16:	a3 a8 83 10 00       	mov    %eax,0x1083a8
   if ((initialized == 0) && (stream != 0))   /* protect against        */
-  100cf7:	75 14                	jne    100d0d <SelectStream+0x2e>
-  100cf9:	85 c0                	test   %eax,%eax
-  100cfb:	74 10                	je     100d0d <SelectStream+0x2e>
+  100d1b:	75 14                	jne    100d31 <SelectStream+0x2e>
+  100d1d:	85 c0                	test   %eax,%eax
+  100d1f:	74 10                	je     100d31 <SelectStream+0x2e>
     PlantSeeds(DEFAULT);                     /* un-initialized streams */
-  100cfd:	c7 44 24 10 15 cd 5b 	movl   $0x75bcd15,0x10(%esp)
-  100d04:	07 
+  100d21:	c7 44 24 10 15 cd 5b 	movl   $0x75bcd15,0x10(%esp)
+  100d28:	07 
 }
-  100d05:	83 c4 0c             	add    $0xc,%esp
+  100d29:	83 c4 0c             	add    $0xc,%esp
  * ------------------------------------------------------------------
  */
 {
   stream = ((unsigned int) index) % STREAMS;
   if ((initialized == 0) && (stream != 0))   /* protect against        */
     PlantSeeds(DEFAULT);                     /* un-initialized streams */
-  100d08:	e9 04 00 00 00       	jmp    100d11 <PlantSeeds>
+  100d2c:	e9 04 00 00 00       	jmp    100d35 <PlantSeeds>
 }
-  100d0d:	83 c4 0c             	add    $0xc,%esp
-  100d10:	c3                   	ret    
+  100d31:	83 c4 0c             	add    $0xc,%esp
+  100d34:	c3                   	ret    
 
-00100d11 <PlantSeeds>:
+00100d35 <PlantSeeds>:
  * with all states dictated by the state of the default stream. 
  * The sequence of planted states is separated one from the next by 
  * 8,367,782 calls to Random().
  * ---------------------------------------------------------------------
  */
 {
-  100d11:	57                   	push   %edi
+  100d35:	57                   	push   %edi
   s = stream;                            /* remember the current stream */
   SelectStream(0);                       /* change to stream 0          */
   PutSeed(x);                            /* set seed[0]                 */
   stream = s;                            /* reset the current stream    */
   for (j = 1; j < STREAMS; j++) {
     x = A256 * (seed[j - 1] % Q) - R * (seed[j - 1] / Q);
-  100d12:	bf ea 6d 01 00       	mov    $0x16dea,%edi
+  100d36:	bf ea 6d 01 00       	mov    $0x16dea,%edi
  * with all states dictated by the state of the default stream. 
  * The sequence of planted states is separated one from the next by 
  * 8,367,782 calls to Random().
  * ---------------------------------------------------------------------
  */
 {
-  100d17:	56                   	push   %esi
+  100d3b:	56                   	push   %esi
   s = stream;                            /* remember the current stream */
   SelectStream(0);                       /* change to stream 0          */
   PutSeed(x);                            /* set seed[0]                 */
   stream = s;                            /* reset the current stream    */
   for (j = 1; j < STREAMS; j++) {
     x = A256 * (seed[j - 1] % Q) - R * (seed[j - 1] / Q);
-  100d18:	be 16 92 fe ff       	mov    $0xfffe9216,%esi
+  100d3c:	be 16 92 fe ff       	mov    $0xfffe9216,%esi
  * with all states dictated by the state of the default stream. 
  * The sequence of planted states is separated one from the next by 
  * 8,367,782 calls to Random().
  * ---------------------------------------------------------------------
  */
 {
-  100d1d:	53                   	push   %ebx
-  100d1e:	83 ec 1c             	sub    $0x1c,%esp
+  100d41:	53                   	push   %ebx
+  100d42:	83 ec 1c             	sub    $0x1c,%esp
   const long R = MODULUS % A256;
         int  j;
         int  s;
 
   initialized = 1;
   s = stream;                            /* remember the current stream */
-  100d21:	8b 1d a8 83 10 00    	mov    0x1083a8,%ebx
+  100d45:	8b 1d a8 83 10 00    	mov    0x1083a8,%ebx
   SelectStream(0);                       /* change to stream 0          */
-  100d27:	6a 00                	push   $0x0
+  100d4b:	6a 00                	push   $0x0
   const long Q = MODULUS / A256;
   const long R = MODULUS % A256;
         int  j;
         int  s;
 
   initialized = 1;
-  100d29:	c7 05 ac 83 10 00 01 	movl   $0x1,0x1083ac
-  100d30:	00 00 00 
+  100d4d:	c7 05 ac 83 10 00 01 	movl   $0x1,0x1083ac
+  100d54:	00 00 00 
   s = stream;                            /* remember the current stream */
   SelectStream(0);                       /* change to stream 0          */
-  100d33:	e8 a7 ff ff ff       	call   100cdf <SelectStream>
+  100d57:	e8 a7 ff ff ff       	call   100d03 <SelectStream>
   PutSeed(x);                            /* set seed[0]                 */
-  100d38:	59                   	pop    %ecx
-  100d39:	ff 74 24 2c          	pushl  0x2c(%esp)
-  100d3d:	e8 5f ff ff ff       	call   100ca1 <PutSeed>
+  100d5c:	59                   	pop    %ecx
+  100d5d:	ff 74 24 2c          	pushl  0x2c(%esp)
+  100d61:	e8 5f ff ff ff       	call   100cc5 <PutSeed>
   stream = s;                            /* reset the current stream    */
-  100d42:	b9 01 00 00 00       	mov    $0x1,%ecx
-  100d47:	83 c4 10             	add    $0x10,%esp
-  100d4a:	89 1d a8 83 10 00    	mov    %ebx,0x1083a8
+  100d66:	b9 01 00 00 00       	mov    $0x1,%ecx
+  100d6b:	83 c4 10             	add    $0x10,%esp
+  100d6e:	89 1d a8 83 10 00    	mov    %ebx,0x1083a8
   for (j = 1; j < STREAMS; j++) {
     x = A256 * (seed[j - 1] % Q) - R * (seed[j - 1] / Q);
-  100d50:	8b 04 8d 5c 10 10 00 	mov    0x10105c(,%ecx,4),%eax
-  100d57:	99                   	cltd   
-  100d58:	f7 fe                	idiv   %esi
-  100d5a:	69 d8 1d 1c 00 00    	imul   $0x1c1d,%eax,%ebx
-  100d60:	8b 04 8d 5c 10 10 00 	mov    0x10105c(,%ecx,4),%eax
-  100d67:	99                   	cltd   
-  100d68:	f7 ff                	idiv   %edi
-  100d6a:	69 d2 8d 59 00 00    	imul   $0x598d,%edx,%edx
-  100d70:	01 d3                	add    %edx,%ebx
+  100d74:	8b 04 8d 5c 10 10 00 	mov    0x10105c(,%ecx,4),%eax
+  100d7b:	99                   	cltd   
+  100d7c:	f7 fe                	idiv   %esi
+  100d7e:	69 d8 1d 1c 00 00    	imul   $0x1c1d,%eax,%ebx
+  100d84:	8b 04 8d 5c 10 10 00 	mov    0x10105c(,%ecx,4),%eax
+  100d8b:	99                   	cltd   
+  100d8c:	f7 ff                	idiv   %edi
+  100d8e:	69 d2 8d 59 00 00    	imul   $0x598d,%edx,%edx
+  100d94:	01 d3                	add    %edx,%ebx
     if (x > 0)
-  100d72:	85 db                	test   %ebx,%ebx
-  100d74:	7f 06                	jg     100d7c <PlantSeeds+0x6b>
+  100d96:	85 db                	test   %ebx,%ebx
+  100d98:	7f 06                	jg     100da0 <PlantSeeds+0x6b>
       seed[j] = x;
     else
       seed[j] = x + MODULUS;
-  100d76:	81 c3 ff ff ff 7f    	add    $0x7fffffff,%ebx
-  100d7c:	89 1c 8d 60 10 10 00 	mov    %ebx,0x101060(,%ecx,4)
+  100d9a:	81 c3 ff ff ff 7f    	add    $0x7fffffff,%ebx
+  100da0:	89 1c 8d 60 10 10 00 	mov    %ebx,0x101060(,%ecx,4)
   initialized = 1;
   s = stream;                            /* remember the current stream */
   SelectStream(0);                       /* change to stream 0          */
   PutSeed(x);                            /* set seed[0]                 */
   stream = s;                            /* reset the current stream    */
   for (j = 1; j < STREAMS; j++) {
-  100d83:	41                   	inc    %ecx
-  100d84:	81 f9 00 01 00 00    	cmp    $0x100,%ecx
-  100d8a:	75 c4                	jne    100d50 <PlantSeeds+0x3f>
+  100da7:	41                   	inc    %ecx
+  100da8:	81 f9 00 01 00 00    	cmp    $0x100,%ecx
+  100dae:	75 c4                	jne    100d74 <PlantSeeds+0x3f>
     if (x > 0)
       seed[j] = x;
     else
       seed[j] = x + MODULUS;
    }
 }
-  100d8c:	83 c4 10             	add    $0x10,%esp
-  100d8f:	5b                   	pop    %ebx
-  100d90:	5e                   	pop    %esi
-  100d91:	5f                   	pop    %edi
-  100d92:	c3                   	ret    
+  100db0:	83 c4 10             	add    $0x10,%esp
+  100db3:	5b                   	pop    %ebx
+  100db4:	5e                   	pop    %esi
+  100db5:	5f                   	pop    %edi
+  100db6:	c3                   	ret    
 
-00100d93 <TestRandom>:
+00100db7 <TestRandom>:
    void TestRandom(void)
 /* ------------------------------------------------------------------
  * Use this (optional) function to test for a correct implementation.
  * ------------------------------------------------------------------    
  */
 {
-  100d93:	53                   	push   %ebx
+  100db7:	53                   	push   %ebx
   long   x;
   double u;
   char   ok = 0;  
 
   SelectStream(0);                  /* select the default stream */
   PutSeed(1);                       /* and set the state to 1    */
-  100d94:	31 db                	xor    %ebx,%ebx
+  100db8:	31 db                	xor    %ebx,%ebx
    void TestRandom(void)
 /* ------------------------------------------------------------------
  * Use this (optional) function to test for a correct implementation.
  * ------------------------------------------------------------------    
  */
 {
-  100d96:	83 ec 14             	sub    $0x14,%esp
+  100dba:	83 ec 14             	sub    $0x14,%esp
   long   i;
   long   x;
   double u;
   char   ok = 0;  
 
   SelectStream(0);                  /* select the default stream */
-  100d99:	6a 00                	push   $0x0
-  100d9b:	e8 3f ff ff ff       	call   100cdf <SelectStream>
+  100dbd:	6a 00                	push   $0x0
+  100dbf:	e8 3f ff ff ff       	call   100d03 <SelectStream>
   PutSeed(1);                       /* and set the state to 1    */
-  100da0:	c7 04 24 01 00 00 00 	movl   $0x1,(%esp)
-  100da7:	e8 f5 fe ff ff       	call   100ca1 <PutSeed>
-  100dac:	83 c4 10             	add    $0x10,%esp
+  100dc4:	c7 04 24 01 00 00 00 	movl   $0x1,(%esp)
+  100dcb:	e8 f5 fe ff ff       	call   100cc5 <PutSeed>
+  100dd0:	83 c4 10             	add    $0x10,%esp
   for(i = 0; i < 10000; i++)
-  100daf:	43                   	inc    %ebx
+  100dd3:	43                   	inc    %ebx
     u = Random();
-  100db0:	e8 97 fe ff ff       	call   100c4c <Random>
-  100db5:	dd d8                	fstp   %st(0)
+  100dd4:	e8 97 fe ff ff       	call   100c70 <Random>
+  100dd9:	dd d8                	fstp   %st(0)
   double u;
   char   ok = 0;  
 
   SelectStream(0);                  /* select the default stream */
   PutSeed(1);                       /* and set the state to 1    */
   for(i = 0; i < 10000; i++)
-  100db7:	81 fb 10 27 00 00    	cmp    $0x2710,%ebx
-  100dbd:	75 f0                	jne    100daf <TestRandom+0x1c>
+  100ddb:	81 fb 10 27 00 00    	cmp    $0x2710,%ebx
+  100de1:	75 f0                	jne    100dd3 <TestRandom+0x1c>
     u = Random();
   GetSeed(&x);                      /* get the new state value   */
   ok = (x == CHECK);                /* and check for correctness */
 
   SelectStream(1);                  /* select stream 1                 */ 
-  100dbf:	83 ec 0c             	sub    $0xc,%esp
-  100dc2:	6a 01                	push   $0x1
-  100dc4:	e8 16 ff ff ff       	call   100cdf <SelectStream>
+  100de3:	83 ec 0c             	sub    $0xc,%esp
+  100de6:	6a 01                	push   $0x1
+  100de8:	e8 16 ff ff ff       	call   100d03 <SelectStream>
   PlantSeeds(1);                    /* set the state of all streams    */
-  100dc9:	c7 04 24 01 00 00 00 	movl   $0x1,(%esp)
-  100dd0:	e8 3c ff ff ff       	call   100d11 <PlantSeeds>
+  100ded:	c7 04 24 01 00 00 00 	movl   $0x1,(%esp)
+  100df4:	e8 3c ff ff ff       	call   100d35 <PlantSeeds>
   GetSeed(&x);                      /* get the state of stream 1       */
   ok = ok && (x == A256);           /* x should be the jump multiplier */    
 }
-  100dd5:	83 c4 18             	add    $0x18,%esp
-  100dd8:	5b                   	pop    %ebx
-  100dd9:	c3                   	ret    
+  100df9:	83 c4 18             	add    $0x18,%esp
+  100dfc:	5b                   	pop    %ebx
+  100dfd:	c3                   	ret    

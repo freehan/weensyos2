@@ -134,9 +134,9 @@ start(void)
 	// Initialize the scheduling algorithm.
 	//by Sk
 	//scheduling_algorithm = 0;
-	//scheduling_algorithm = 1;
-    //scheduling_algorithm = 2;
-    scheduling_algorithm = 3;
+	scheduling_algorithm = 1;
+        //scheduling_algorithm = 2;
+        //scheduling_algorithm = 3;
 	// Switch to the first process.
 #if CURRENT_PART == 1
 	proc_array[1].p_runtime++;
