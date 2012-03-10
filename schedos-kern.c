@@ -20,7 +20,6 @@
 #define NPROCS		5
 #define PROC1_START	0x200000
 #define PROC_SIZE	0x100000
-
 // +---------+-----------------------+--------+---------------------+---------/
 // | Base    | Kernel         Kernel | Shared | App 0         App 0 | App 1
 // | Memory  | Code + Data     Stack | Data   | Code + Data   Stack | Code ...
@@ -49,6 +48,33 @@ process_t *current;
 // The preferred scheduling algorithm.
 int scheduling_algorithm;
 
+//by SK, to store the ticket for each process
+#define MAX_TICKET_NUM 100
+static int ticket_num;
+static pid_t tickets[MAX_TICKET_NUM];
+
+void
+delete_ticket(pid_t pid){
+	int i;
+	for(i = ticket_num-1; i>=0;i--){
+		if(tickets[i]==pid){
+			int j;
+			for(j = i;j<ticket_num-1;j++){
+				tickets[j] = tickets[j+1];
+			}
+			break;
+		}
+	}
+	ticket_num--;
+}
+
+pid_t
+get_winner(void){
+	int r = Random()*100000;
+	int winner = r%ticket_num;
+	return tickets[winner];
+}
+
 
 /*****************************************************************************
  * start
@@ -62,12 +88,13 @@ void
 start(void)
 {
 	int i;
+	ticket_num = 0;
 
 	// Set up hardware (schedos-x86.c)
 	segments_init();
 	interrupt_controller_init(0);
 	console_clear();
-
+	PlantSeeds(1);
 	// Initialize process descriptors as empty
 	memset(proc_array, 0, sizeof(proc_array));
 	for (i = 0; i < NPROCS; i++) {
@@ -106,11 +133,15 @@ start(void)
 	//by Sk
 	//scheduling_algorithm = 0;
 	//scheduling_algorithm = 1;
-    scheduling_algorithm = 2;
+    //scheduling_algorithm = 2;
+    scheduling_algorithm = 3;
 	// Switch to the first process.
 #if CURRENT_PART == 1
 	proc_array[1].p_runtime++;
 #endif
+
+	PlantSeeds(1);
+	
 	run(&proc_array[1]);
 
 	// Should never get here!
@@ -180,7 +211,16 @@ interrupt(registers_t *reg)
 	case INT_SYS_PROP:
 		current->p_proportional = reg->reg_eax;
 		run(current);
-	
+
+	case INT_SYS_GETTICKET:
+		if(ticket_num<MAX_TICKET_NUM){
+			tickets[ticket_num] = current->p_pid;
+			ticket_num++;
+		}
+		run(current);
+	case INT_SYS_ABORTTICKET:
+		delete_ticket(current->p_pid);
+		run(current);
 	default:
 		while (1)
 			/* do nothing */;
@@ -252,6 +292,26 @@ schedule(void)
 		}
 		//cursorpos = console_printf(cursorpos, 0x100, "running %d!\n", highest_pri_p);
 		proc_array[winner].p_runtime++;
+		run(&proc_array[winner]);
+	}
+	else if(scheduling_algorithm == 3){ //lottery
+		pid_t winner;
+		if(ticket_num < NPROCS-1){
+			while (1) {
+				pid = (pid + 1) % NPROCS;
+				// Run the selected process, but skip
+				// non-runnable processes.
+				// Note that the 'run' function does not return.
+				if (proc_array[pid].p_state == P_RUNNABLE)
+					run(&proc_array[pid]);
+			}
+		}
+		else{
+			winner = get_winner();
+			while(proc_array[winner].p_state != P_RUNNABLE){
+				winner = get_winner();
+			}
+		}
 		run(&proc_array[winner]);
 	}
 #endif

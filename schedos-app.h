@@ -62,6 +62,16 @@ sys_proportional(int prop){
 				"a" (prop)
 			: "cc", "memory");
 }
+
+static inline void
+sys_getticket(){
+	asm volatile("int %0\n"::"i" (INT_SYS_GETTICKET):"cc","memory");
+}
+
+static inline void
+sys_abortticket(){
+	asm volatile("int %0\n"::"i" (INT_SYS_ABORTTICKET):"cc","memory");
+}
 /*****************************************************************************
  * sys_exit(status)
  *

@@ -34,6 +34,7 @@ start(void)
 	int i;
 	sys_priority(PRIORITY);
 	sys_proportional(PROPORTIONAL);
+	sys_getticket();
 	for (i = 0; i < RUNCOUNT; i++) {
 		// Write characters to the console, yielding after each one.
 		*cursorpos++ = PRINTCHAR;

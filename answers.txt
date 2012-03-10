@@ -59,3 +59,5 @@ Anything else you'd like us to know:
 
 
 Extra credit exercises:
+Extra credit 7:
+First, we use the random function provided by Steve Park (www.cs.wm.edu/~va/software/park) and add two new system calls as getticket and abortticket. When a process call getticket, its pid will add to the ticket array, and array's index is directly the lottery ticket number. Everytime when scheduling, the kernel get one random index and run the process contained in the element of the array. 
