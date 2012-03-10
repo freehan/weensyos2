@@ -28,6 +28,8 @@ start(void)
 
 	for (i = 0; i < RUNCOUNT; i++) {
 		// Write characters to the console, yielding after each one.
+#if CURRENT_PART == 1
+		*cursorpos++ = PRINTCHAR;
 
 #if CURRENT_PART == 2
 		//XIA:first solution for synchronization
@@ -37,11 +39,12 @@ start(void)
 		*cursorpos++ = PRINTCHAR;
 		atomic_swap(&lock,0);
 #endif
-#endif
+
 
 		//XIA:second solution for synchronization
 #ifdef EXTRA
 		sys_print((uint16_t)PRINTCHAR);
+#endif
 #endif
 		sys_yield();
 	}

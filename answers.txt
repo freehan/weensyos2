@@ -29,7 +29,8 @@ Did you complete Exercise 4A, Exercise 4B, or both for extra credit?
 
 
 Exercise 5:
-During the execution of process 4, the first known timer interrupt occur.  
+During the execution of process 4, the first known timer interrupt occur. 
+When a clock interrupt occurs, the schedule() function is called. The schedule() functions is called, it finds the next runnable process and run it. So process 4 could not finish execution so it could not print out 4 on the screen. 
 
 (Exercise 6 is a coding exercise)
 
