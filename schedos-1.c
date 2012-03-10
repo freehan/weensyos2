@@ -30,6 +30,7 @@ start(void)
 		// Write characters to the console, yielding after each one.
 #if CURRENT_PART == 1
 		*cursorpos++ = PRINTCHAR;
+#endif
 
 #if CURRENT_PART == 2
 		//XIA:first solution for synchronization
